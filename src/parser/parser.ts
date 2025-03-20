@@ -166,9 +166,9 @@ export function sqlAstToGraph(ast: any): Graph {  // Changed signature for TypeS
     }
   });
   }
-  console.log(typeof ast);
+  // console.log(typeof ast);
   console.log(ast);
-  console.log(ast.from);
+  // console.log(ast.from);
   // Create source table nodes for the main query
   ast.from.forEach((tableItem: any) => {
     const tableId = `table_${tableItem.as || tableItem.table}`;

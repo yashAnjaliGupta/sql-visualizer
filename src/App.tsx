@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ASTDisplayBox from './components/ASTdispalybox';
 import CodeInputBox from './components/CodeInputBox';
 import FlowDiagram from './flowDiagram/FlowDiagram';
 import { codeToAst, getAllTableNodesAsTableNodes, getFilteredEdges, sqlAstToGraph } from './parser/parser';
-
+interface TableNode{
+    id: string;
+    type: string;
+    data: { tableName: string; columns: { name: string; columnId: string }[] };
+    position: { x: number; y: number };
+  }
 function App() {
     const [input, setInput] = useState(`WITH CTE_AERequests
 AS (
@@ -53,25 +58,45 @@ INNER JOIN conformed.vw_DynamightCustomerOffers DCO ON DCO.DynamightCustomerOffe
         OR A.AreaBudgetAllocationPeriod LIKE 'N/A'
         )
 INNER JOIN conformed.vw_TrainingEntitlements TE ON TE.DynamightCustomerOfferID = DCO.DynamightCustomerOfferID`);
+    
+    // Keep initial processing for state initialization
+    const initialAst = codeToAst(input);
+    console.log('Initial AST:', initialAst);
+    const initialGraph = sqlAstToGraph(initialAst);
+    const initialNodes = getAllTableNodesAsTableNodes(initialGraph);
+    const initialEdges = getFilteredEdges(initialGraph);
 
+    const [tableNodes, setTableNodes] = useState<TableNode[]>(initialNodes);
+    const [tableEdges, setTableEdges] = useState(initialEdges);
+    
+    // Add useEffect to handle input changes
+    useEffect(() => {
+        const newAst = codeToAst(input);
+        const g = sqlAstToGraph(newAst);
+        setTableNodes(getAllTableNodesAsTableNodes(g));
+        setTableEdges(getFilteredEdges(g));
+    }, [input]);
+
+    // Simplify handleInputSubmit to just update input
     const handleInputSubmit = (input: string) => {
         setInput(input);
     };
-    const ast = codeToAst(input);
-    // console.log(ast);
-    const g=sqlAstToGraph(ast);
-    // console.log(JSON.stringify(g, null, 2));
-    const temp=getAllTableNodesAsTableNodes(g);
-    // console.log(temp);
-    const edges = getFilteredEdges(g);
-    // console.log(edges);
+
+    useEffect(() => {
+        console.log('Updated table nodes:', tableNodes);
+        console.log('Updated table edges:', tableEdges);
+    }, [tableNodes, tableEdges]);
+
     return (
         <div className="App">
             <h1>SQL Visualizer</h1>
             <div style={{ display: 'flex' }}>
                 <CodeInputBox onSubmit={handleInputSubmit} inputValue={input}/>
                 <ASTDisplayBox input={input} />
-                <FlowDiagram tableNodes={temp} tableEdges ={edges}></FlowDiagram>
+                <FlowDiagram 
+                    tableNodes={tableNodes} 
+                    tableEdges={tableEdges}
+                />
             </div>
         </div>
     );
