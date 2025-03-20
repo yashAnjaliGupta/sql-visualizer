@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Background, Controls, EdgeChange, MiniMap, NodeChange, ReactFlow,applyEdgeChanges,
     applyNodeChanges, } from '@xyflow/react';
 import CustomNode from './CustomNode';
@@ -50,8 +50,13 @@ interface FlowDiagramProps {
 }
 export default function FlowDiagram({ tableNodes,tableEdges}: FlowDiagramProps) {
     const [nodes, setNodes] = useState(tableNodes);
-    // console.log(nodes);
     const [edges, setEdges] = useState(tableEdges);
+
+    useEffect(() => {
+        setNodes(tableNodes);
+        setEdges(tableEdges);
+    }, [tableNodes, tableEdges]);
+
     const onNodesChange = useCallback(
         (changes: NodeChange<{ id: string; type: string; position: { x: number; y: number }; data: { tableName: string; columns: { name: string; columnId: string }[] } }>[]) => setNodes((nds) => applyNodeChanges(changes, nds)),
         [setNodes],
@@ -60,7 +65,8 @@ export default function FlowDiagram({ tableNodes,tableEdges}: FlowDiagramProps) 
         (changes: EdgeChange<{ id: string; source: string; target: string; sourceHandle: string; targetHandle: string; }>[]) => setEdges((eds) => applyEdgeChanges(changes, eds)),
         [setEdges],
       );
-    // console.log(nodes);
+    console.log(nodes);
+    console.log(edges);
     return (
         <div style={{ width: '50vw', height: '70vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', border: '1px solid black' }}>
             <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}>
