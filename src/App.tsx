@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ASTDisplayBox from './components/ASTdispalybox';
 import CodeInputBox from './components/CodeInputBox';
 import FlowDiagram from './flowDiagram/FlowDiagram';
-import { codeToAst, getAllTableNodesAsTableNodes, getFilteredEdges, sqlAstToGraph } from './parser/parser';
+// import { codeToAst, getAllTableNodesAsTableNodes, getFilteredEdges, sqlAstToGraph } from './parser/parser';
+import {codeToAst, getAllTableNodesAsTableNodes, getFilteredEdges, sqlAstToGraph } from './parser/graphGenerator';
 interface TableNode{
     id: string;
     type: string;
@@ -61,7 +62,7 @@ INNER JOIN conformed.vw_TrainingEntitlements TE ON TE.DynamightCustomerOfferID =
     
     // Keep initial processing for state initialization
     const initialAst = codeToAst(input);
-    console.log('Initial AST:', initialAst);
+    // console.log('Initial AST:', initialAst);
     const initialGraph = sqlAstToGraph(initialAst);
     const initialNodes = getAllTableNodesAsTableNodes(initialGraph);
     const initialEdges = getFilteredEdges(initialGraph);
@@ -73,6 +74,7 @@ INNER JOIN conformed.vw_TrainingEntitlements TE ON TE.DynamightCustomerOfferID =
     useEffect(() => {
         const newAst = codeToAst(input);
         const g = sqlAstToGraph(newAst);
+        console.log(g);
         setTableNodes(getAllTableNodesAsTableNodes(g));
         setTableEdges(getFilteredEdges(g));
     }, [input]);
