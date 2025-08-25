@@ -1,239 +1,212 @@
 import { Parser } from "node-sql-parser";
+import { Graph, TableNode } from './types';
+import { astToGraph } from './astWalker';
 
-interface GraphNode {
-    id: string;
-    type: string;
-    [key: string]: any;
-  }
+function assignPositionsWithTopologicalSort(
+  nodes: TableNode[], 
+  edges: { 
+    id: string; 
+    source: string; 
+    target: string; 
+    sourceHandle: string; 
+    targetHandle: string; 
+  }[]
+): TableNode[] {
+  const HORIZONTAL_SPACING = 400;
+  const BASE_NODE_HEIGHT = 50;
+  const HEIGHT_PER_COLUMN = 30;
+  const VERTICAL_PADDING = 70;
   
-  interface TableNode{
-    id: string;
-    type: string;
-    data: { tableName: string; columns: { name: string; columnId: string }[] };
-    position: { x: number; y: number };
-  }
+  const calculateNodeHeight = (node: TableNode): number => {
+    return BASE_NODE_HEIGHT + (node.data.columns.length * HEIGHT_PER_COLUMN);
+  };
   
-  interface GraphEdge {
-    id: string;
-    source: string;
-    target: string;
-    type: string;
-    sourceHandle?: string;
-    targetHandle?: string;
-    label?: string | null;
-  }
+  const graph: { [id: string]: string[] } = {};
+  const inDegree: { [id: string]: number } = {};
   
-  interface Graph {
-    nodes: GraphNode[];
-    edges: GraphEdge[];
-    tableNodes: { [key: string]: GraphNode };
-    columnNodes: { [key: string]: GraphNode };
-  }
-export function codeToAst(code: string): any {
-    const parser = new Parser();
-    const ast = parser.astify(code);
-    return ast;
-}
-
-function findAllFromClauses(ast: any): any[] {
-    const fromClauses: any[] = [];
-    function traverse(node: any) {
-        if (!node || typeof node !== 'object') return;
-
-        // Check if the current node has a 'from' property
-        if (node.from && Array.isArray(node.from)) {
-            fromClauses.push(node.from);
-        }
-
-        // Handle arrays
-        if (Array.isArray(node)) {
-            node.forEach(item => traverse(item));
-        }
-        // Traverse all other properties
-        Object.values(node).forEach(value => {
-            if (typeof value === 'object' && value !== null) {
-                traverse(value);
-            }
-        });
+  nodes.forEach(node => {
+    graph[node.id] = [];
+    inDegree[node.id] = 0;
+  });
+  
+  edges.forEach(edge => {
+    if (graph[edge.source] !== undefined && graph[edge.target] !== undefined) {
+      graph[edge.target].push(edge.source);
+      inDegree[edge.source]++;
     }
-    traverse(ast);
-    return fromClauses;
+  });
+  
+  const queue: string[] = [];
+  const layerMap: { [id: string]: number } = {};
+  
+  Object.keys(inDegree).forEach(nodeId => {
+    if (inDegree[nodeId] === 0) {
+      queue.push(nodeId);
+      layerMap[nodeId] = 0;
+    }
+  });
+  
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    graph[current].forEach(neighbor => {
+      inDegree[neighbor]--;
+      if (inDegree[neighbor] === 0) {
+        queue.push(neighbor);
+        layerMap[neighbor] = layerMap[current] - 1;
+      }
+    });
+  }
+  
+  nodes.forEach(node => {
+    if (layerMap[node.id] === undefined) {
+      const maxLayer = Math.max(...Object.values(layerMap), 0);
+      layerMap[node.id] = maxLayer + 1;
+    }
+  });
+  
+  const layerGroups: { [layer: number]: TableNode[] } = {};
+  nodes.forEach(node => {
+    const layer = layerMap[node.id];
+    if (!layerGroups[layer]) {
+      layerGroups[layer] = [];
+    }
+    layerGroups[layer].push(node);
+  });
+  
+  const layerHeights: { [layer: number]: number } = {};
+  const layerNodeHeights: { [nodeId: string]: number } = {};
+  const verticalPositions: { [id: string]: number } = {};
+  
+  Object.entries(layerGroups).forEach(([layer, layerNodes]) => {
+    layerNodes.sort((a, b) => b.data.columns.length - a.data.columns.length);
+    let totalLayerHeight = 0;
+    const layerIndex = parseInt(layer);
+    layerNodes.forEach(node => {
+      const nodeHeight = calculateNodeHeight(node);
+      layerNodeHeights[node.id] = nodeHeight;
+      totalLayerHeight += nodeHeight + VERTICAL_PADDING;
+    });
+    if (layerNodes.length > 0) {
+      totalLayerHeight -= VERTICAL_PADDING;
+    }
+    layerHeights[layerIndex] = totalLayerHeight;
+    if (layerNodes.length === 1) {
+      verticalPositions[layerNodes[0].id] = 0;
+    } else {
+      let currentY = -totalLayerHeight / 2;
+      layerNodes.forEach(node => {
+        verticalPositions[node.id] = currentY;
+        currentY += layerNodeHeights[node.id] + VERTICAL_PADDING;
+      });
+    }
+  });
+  
+  return nodes.map(node => ({
+    ...node,
+    position: {
+      x: layerMap[node.id] * HORIZONTAL_SPACING,
+      y: verticalPositions[node.id]
+    }
+  }));
 }
-export function sqlAstToGraph(ast: any): any {
-    const graph: Graph = {
-        nodes: [],
-        edges: [],
-        tableNodes: {},
-        columnNodes: {},
+
+// Normalize common database identifiers to the exact strings expected by node-sql-parser
+function normalizeDatabaseName(db?: string): string | undefined {
+  if (!db) return undefined;
+  const key = db.trim().toLowerCase();
+  const map: { [k: string]: string } = {
+    // MySQL family
+    mysql: 'MySQL',
+    mariadb: 'MariaDB',
+    // Postgres
+    postgres: 'PostgresQL',
+    postgresql: 'PostgresQL',
+    'postgresql (pgsql)': 'PostgresQL',
+    pg: 'PostgresQL',
+    // SQLite
+    sqlite: 'Sqlite',
+    // Redshift
+    redshift: 'Redshift',
+    // Microsoft / T-SQL
+    mssql: 'TransactSQL',
+    sqlserver: 'TransactSQL',
+    tsql: 'TransactSQL',
+    transactsql: 'TransactSQL',
+    // Others
+    hive: 'Hive',
+    db2: 'DB2',
+    bigquery: 'BigQuery',
+    athena: 'Athena',
+    flink: 'FlinkSQL',
+    flinksql: 'FlinkSQL',
+    snowflake: 'Snowflake',
+    noql: 'Noql',
+  };
+  // Allow exact expected values as-is
+  const allowed = new Set([
+    'MySQL','MariaDB','PostgresQL','Sqlite','Redshift','TransactSQL','Hive','DB2','BigQuery','Athena','FlinkSQL','Snowflake','Noql'
+  ]);
+  const normalized = map[key];
+  if (normalized) return normalized;
+  if (allowed.has(db)) return db;
+  // Unknown or unsupported (e.g., Oracle) => do not pass database option
+  return undefined;
+}
+
+export function codeToAst(code: string, database: string): any {
+  const parser = new Parser();
+  try {
+    const normalizedDb = normalizeDatabaseName(database);
+    const options: any = {
+      ...(normalizedDb ? { database: normalizedDb } : {}),
+      parseOptions: { includeLocations: true },
     };
-    interface NodeProps {
-        [key: string]: any;
-    }
-    function createNode(id: string, type: string, props: NodeProps): GraphNode {
-        if (type === 'table' || type === 'cte') {
-            const name = props.name;
-            const alias = props.alias;
-            
-            const existingTableNode = Object.values(graph.tableNodes).find(node => 
-              node.name === name || 
-              (alias && node.alias === alias) ||
-              (node.alias && node.alias === name) ||
-              (alias && node.name === alias)
-          );
-            // console.log("check for existing node",props,existingTableNode);
-            if (existingTableNode) {
-                return existingTableNode;
-            }
-        }
+    const ast = parser.astify(code, options);
+    console.log('LOC', ast);
+    return ast;
+  } catch (error) {
+    return error;
+  }
+}
 
-        // If no existing node found, create a new one
-        const node: GraphNode = { id, type, ...props };
-        graph.nodes.push(node);
-        return node;
-    }
-
-    function createEdge(source: string, target: string, type: string,sourceHandle?:string,targetHandle?:string, label: string | null = null): GraphEdge {
-        const edgeId = `edge_${sourceHandle}_to_${targetHandle}_${type}`;
-
-        const edge: GraphEdge = {
-            id: edgeId,
-            source,
-            target,
-            type,
-            sourceHandle, 
-            targetHandle,
-            label
-        };
-        graph.edges.push(edge);
-        return edge;
-    }
-    function processSourceTables(sourceTables: any,currenTableID:string): void {
-        console.log("sourceTables",sourceTables);
-        sourceTables.forEach((tableItem: any) => {
-            const tableId = `table_${tableItem.as || tableItem.table}`;
-            graph.tableNodes[tableItem.as || tableItem.table] = createNode(tableId, 'table', {
-            name: tableItem.table,
-            alias: tableItem.as,
-            db: tableItem.db
-            });
-            // Create edge from source table to CTE
-            createEdge(tableId, currenTableID, 'table_TO_table');
-        });
-    }
-    function processColumns(columns: any, tableId: string,tableName:string): void {
-        columns.forEach((column: any) => {
-            let ColumnName: string;
-            let sourceInfo: { table: string; column: string } | null = null;
-            if (column.expr.type === 'column_ref') {
-                if (column.as) {
-                    ColumnName = column.as;
-                } else {
-                    ColumnName = column.expr.column;
-                }
-                // Check if the table reference is an alias
-                let sourceTable = column.expr.table;
-                const tableNode = Object.values(graph.tableNodes).find(node => 
-                    node.alias === sourceTable
-                );
-                if (tableNode) {
-                    sourceTable = tableNode.name; // Use the actual table name instead of alias
-                }
-                sourceInfo = {
-                    table: sourceTable,
-                    column: column.expr.column
-                };
-            } else {
-                // Handle expressions or computed columns
-                ColumnName = `expr_${Math.random().toString(36).substring(2, 10)}`;
-            }
-            
-            // Create CTE column node
-            const ColumnId = `${tableName}_${ColumnName}`;
-                graph.columnNodes[ColumnId] = createNode(ColumnId, 'column', {
-                name: ColumnName,
-                tableId: tableId,
-                isCteColumn: true
-            });
-            
-            // If this is a direct column reference, create a relationship
-            if (sourceInfo && sourceInfo.table) {
-                const sourceColumnId = `${sourceInfo.table}_${sourceInfo.column}`;
-                if (!graph.columnNodes[sourceColumnId]) {
-                    graph.columnNodes[sourceColumnId] = createNode(sourceColumnId, 'column', {
-                    name: sourceInfo.column,
-                    tableId: `table_${sourceInfo.table}`
-                    });
-                }
-                // Create edge from source column to CTE column
-                createEdge(`table_${sourceInfo.table}`, `table_${tableName}`, 'column_mapping', `source-${sourceColumnId}`, `target-${ColumnId}`);
-            }
-        });
-    }
-    function processCTE(CTEs:any): void {
-        CTEs.forEach((cte: any) => {
-            // Create node for the CTE itself as a virtual table
-            const cteId = `table_${cte.name.value}`;
-            graph.tableNodes[cte.name.value] = createNode(cteId, 'cte', {
-              name: cte.name.value,
-              isCTE: true
-            });
-            // Process source tables within the CTE
-            if (cte.stmt && cte.stmt.ast && cte.stmt.ast.from) {
-                console.log("cte.stmt.ast.from",cte.stmt.ast.from);
-                processSourceTables(cte.stmt.ast.from,cteId);
-            }
-            // Process columns within the CTE
-            if (cte.stmt && cte.stmt.ast && cte.stmt.ast.columns) {
-                processColumns(cte.stmt.ast.columns, cteId,cte.name.value);
-            }
-        })   
-    }
-    // Process source tables
-    const allFromClauses = findAllFromClauses(ast);
-    // Process each FROM clause
-    allFromClauses.forEach(fromClause => {
-        fromClause.forEach((tableItem: any) => {
-            const tableId = `table_${tableItem.table}`;
-            if (!graph.tableNodes[tableItem.table]) {
-                graph.tableNodes[tableItem.as || tableItem.table] = createNode(tableId, 'table', {
-                    name: tableItem.table,
-                    alias: tableItem.as,
-                    db: tableItem.db,
-                });
-            }
-        });
-    });
-    // Process CTEs
-    if (ast.with && Array.isArray(ast.with)) {
-        processCTE(ast.with);
-    }
-    // Create result table node
-    const resultTableId = 'table_Result';
-    graph.tableNodes['Result'] = createNode(resultTableId, 'table', {
-        name: 'Result'
-    });
-    processSourceTables(ast.from,resultTableId);
-    if(ast.columns){
-        processColumns(ast.columns, resultTableId,'Result');
-    }
-    return graph
+export function sqlAstToGraph(ast: any, graphID: number = 1): Graph {
+  const rootAst = Array.isArray(ast) ? ast[0] : ast;
+  return astToGraph(rootAst);
 }
 export function getAllTableNodesAsTableNodes(graph: Graph): TableNode[] {
-  console.log('graph node',graph.nodes);
-  return Object.values(graph.tableNodes).map((node) => ({
-    id: node.id,
-    type: 'customTable',
-    data: {
-      tableName: node.name || '', // assuming table name is stored in node.name
-      columns: Object.values(graph.nodes)
-        .filter(colNode => colNode.tableId === node.id)
-        .map(colNode => ({
-          name: colNode.name,
-          columnId: colNode.id
-        }))
-    },
-    position: { x: 0, y: 0 } // assuming all nodes are at the same position
-  }));
+    // Use a Map to track unique table nodes by ID
+    const uniqueNodes = new Map<string, TableNode>();
+    
+    // Process all table nodes and keep only unique ones
+    Object.values(graph.tableNodes).forEach((node) => {
+        // Skip if we already have this node
+        if (uniqueNodes.has(node.id)) return;
+        
+        // Create a new TableNode and add it to our unique nodes
+        uniqueNodes.set(node.id, {
+            id: node.id,
+            type: 'customTable',
+            data: {
+                tableName: node.name || '',
+        columns: Object.values(graph.nodes)
+          .filter(colNode => colNode.tableId === node.id)
+          .map(colNode => ({
+            name: (colNode.name as string) || '',
+            columnId: colNode.id
+          }))
+            },
+            position: { x: 0, y: 0 }
+        });
+    });
+
+    // Convert the map values to an array
+    const nodes = Array.from(uniqueNodes.values());
+    
+    // Calculate positions
+    const edges = getFilteredEdges(graph);
+    console.log('Filtered nodes:', nodes);
+    console.log('Filtered edges:', edges);
+    return assignPositionsWithTopologicalSort(nodes, edges);
 }
 export function getFilteredEdges(graph: Graph): { 
   id: string; 
@@ -242,14 +215,17 @@ export function getFilteredEdges(graph: Graph): {
   sourceHandle: string; 
   targetHandle: string; 
 }[] {
-  console.log('Edges',graph.edges);
   return graph.edges
-  .filter(edge => edge.type === 'column_mapping' && edge.sourceHandle && edge.targetHandle)
-  .map(edge => ({
+    .filter(edge => 
+      edge.type === 'column_mapping' && 
+      edge.sourceHandle && 
+      edge.targetHandle
+    )
+    .map(edge => ({
       id: edge.id,
       source: edge.source,
       target: edge.target,
       sourceHandle: edge.sourceHandle as string,
       targetHandle: edge.targetHandle as string
-  }));
+    }));
 }
