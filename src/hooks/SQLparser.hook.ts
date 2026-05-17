@@ -28,6 +28,7 @@ export const useSQLParser=(input:string,databaseType:string)=>{
     const processSQL = useCallback((sqlInput: string, dbType: string) => {
         try {
             const newAst = codeToAst(sqlInput, dbType);
+
             if (newAst?.name?.includes('Error')) {
                 const errorLocation = newAst.location ? 
                     `Line ${newAst.location.start.line}, Column ${newAst.location.start.column}` : 
@@ -54,16 +55,24 @@ export const useSQLParser=(input:string,databaseType:string)=>{
                 setErrorMessage(formattedMessage);
                 return;
             }
-            const g = sqlAstToGraph(newAst);
-            console.log('jmd',g)
-            setTableNodes(getAllTableNodesAsTableNodes(g));
-            setTableEdges(getFilteredEdges(g));
-            console.log(tableNodes, tableEdges);
-            // Build highlight ranges per column (use loc if any, fallback to regex)
-            const map = buildColumnHighlightMap(sqlInput, newAst, g);
-            setColumnHighlights(map);
-            setIsError(false);
-            setErrorMessage('');
+            const graphs = sqlAstToGraph(newAst);
+            console.log('jmd',graphs)
+            graphs.forEach((g)=>{
+                setTableNodes(prev => [
+                    ...prev,
+                    ...getAllTableNodesAsTableNodes(g),
+                ]);
+                setTableEdges(prev=>[
+                    ...prev,
+                    ...getFilteredEdges(g)]);
+                // Build highlight ranges per column (use loc if any, fallback to regex)
+                const map = buildColumnHighlightMap(sqlInput, newAst, g);
+                setColumnHighlights(map);
+                setIsError(false);
+                setErrorMessage('');
+            })
+            console.log(tableNodes,tableEdges);
+            
         } catch (error) {
             setIsError(true);
             setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred');
@@ -73,5 +82,6 @@ export const useSQLParser=(input:string,databaseType:string)=>{
     useEffect(() => {
         processSQL(input, databaseType);
     }, [input,databaseType,processSQL]); // Run only once on mount
+    console.log(tableNodes);
     return {tableNodes,tableEdges,isError,errorMessage,columnHighlights}
 }

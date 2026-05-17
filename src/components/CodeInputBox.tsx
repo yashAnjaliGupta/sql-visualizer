@@ -48,7 +48,7 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
   onCollapse,
   highlights,
 }) => {
-  console.log("CodeInputBox render");
+  // console.log("CodeInputBox render");
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 

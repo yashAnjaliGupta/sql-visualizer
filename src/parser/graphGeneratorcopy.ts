@@ -169,9 +169,20 @@ export function codeToAst(code: string, database: string): any {
   }
 }
 
-export function sqlAstToGraph(ast: any, graphID: number = 1): Graph {
-  const rootAst = Array.isArray(ast) ? ast[0] : ast;
-  return astToGraph(rootAst);
+export function sqlAstToGraph(ast: any, graphID: number = 1): Graph[] {
+  if(Array.isArray(ast)==false){
+    const rootAst=ast;
+    return [astToGraph(rootAst)];
+  }else{
+    const graphs:any=[];
+    let id=0;
+    ast.forEach((rootAst)=>{
+      graphs.push(astToGraph(rootAst,id))
+      id=id+1;
+    })
+    return graphs;
+  }
+  
 }
 export function getAllTableNodesAsTableNodes(graph: Graph): TableNode[] {
     // Use a Map to track unique table nodes by ID

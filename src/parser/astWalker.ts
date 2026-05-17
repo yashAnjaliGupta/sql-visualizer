@@ -8,7 +8,7 @@ export interface WalkCtx {
   aliases: AliasResolver;
 }
 
-export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; providedName?: string; providedId?: string }): string {
+export function processAST(ast: any,graphId:Number=0, ctx: WalkCtx, opts?: { isNested?: boolean; providedName?: string; providedId?: string }): string {
   const isNested = !!opts?.isNested;
   const providedName = opts?.providedName;
   const providedId = opts?.providedId;
@@ -17,8 +17,12 @@ export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; 
     ? (ast.from[0].as as string)
     : undefined;
 
-  const resultName = providedName || fromSubqueryAlias || (!ast._next && !isNested ? 'Result' : `Result_${Math.random().toString(36).slice(2,7)}`);
-  const resultId = providedId || ctx.builder.ensureTable(resultName, 'table', { setOperation: ast.set_op || null });
+const resultName =
+  providedName ||
+  fromSubqueryAlias ||
+  (!ast._next && !isNested
+    ? `Result${graphId ? `_${graphId}` : ''}`
+    : `Result_${Math.random().toString(36).slice(2, 7)}`);  const resultId = providedId || ctx.builder.ensureTable(resultName, 'table', { setOperation: ast.set_op || null });
 
   // WITH / CTEs
   const withItems: any[] = Array.isArray(ast.with)
@@ -30,7 +34,7 @@ export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; 
     const cteName = cte.name.value;
     const cteId = ctx.builder.ensureTable(cteName, 'cte', { isCTE: true });
     if (cte.stmt?.ast) {
-      const nestedId = processAST(cte.stmt.ast, ctx, { isNested: true, providedName: cteName, providedId: cteId });
+      const nestedId = processAST(cte.stmt.ast,graphId, ctx, { isNested: true, providedName: cteName, providedId: cteId });
       if (nestedId && nestedId !== cteId) ctx.builder.linkTables(nestedId, cteId, 'table_TO_table');
     }
   });
@@ -41,7 +45,7 @@ export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; 
     const unionId = resultId; // union collapses into result node
     const unionName = resultName;
     for (let i = 0; i < parts.length; i++) {
-      const partId = processAST(parts[i], ctx, { isNested: true });
+      const partId = processAST(parts[i],graphId, ctx, { isNested: true });
       // best-effort: map columns by name
       const g = ctx.builder.getGraph();
       const partCols = g.nodes
@@ -83,7 +87,7 @@ export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; 
         // Ensure subquery in FROM always has a stable table name (alias). If not provided, synthesize one.
         if (!item.as) item.as = `subq_${idx + 1}`;
         ctx.builder.ensureTable(item.as, 'table');
-        const subId = processAST(item.expr.ast, ctx, { isNested: true, providedName: item.as, providedId: `table_${item.as}` });
+        const subId = processAST(item.expr.ast, graphId,ctx, { isNested: true, providedName: item.as, providedId: `table_${item.as}` });
         ctx.builder.linkTables(subId, resultId, 'table_TO_table');
         return;
       }
@@ -110,7 +114,7 @@ export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; 
         const providedName = `Table_${col.as}`; // respect alias if given
         const providedId = providedName ? `table_${providedName}` : undefined;
         console.log('baat kr', providedId, providedName);
-        const subId = processAST(subAst, ctx, { isNested: true, providedName: providedName, providedId });
+        const subId = processAST(subAst, graphId,ctx, { isNested: true, providedName: providedName, providedId });
         ctx.builder.ensureTable(providedName || `subquery_${Math.random().toString(36).slice(2,7)}`, 'table', { alias: providedName, db: col.db });
         console.log('baat kr li',subId);
         // Link subquery result table to this SELECT's result table
@@ -172,11 +176,11 @@ export function processAST(ast: any, ctx: WalkCtx, opts?: { isNested?: boolean; 
   return resultId;
 }
 
-export function astToGraph(ast: any): Graph {
+export function astToGraph(ast: any,id:Number=0): Graph {
   const builder = new GraphBuilder();
   const aliases = new AliasResolver();
-  const root = Array.isArray(ast) ? ast[0] : ast;
-  processAST(root, { builder, aliases });
+  const root = ast;
+  processAST(root,id, { builder, aliases });
   console.log('GraphBuilder', builder.getGraph());
   return builder.getGraph();
 }
