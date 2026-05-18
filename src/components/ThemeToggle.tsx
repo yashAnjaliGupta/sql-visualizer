@@ -5,30 +5,78 @@ interface ThemeToggleProps {
     onToggle: () => void;
 }
 
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDark, onToggle }) => {
+const ThemeToggle: React.FC<ThemeToggleProps> = ({
+    isDark,
+    onToggle
+}) => {
+
     return (
         <button
             onClick={onToggle}
-            style={{
-                position: 'absolute',
-                top: '20px',
-                right: '20px',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                border: 'none',
-                backgroundColor: isDark ? '#4A5568' : '#EDF2F7',
-                color: isDark ? '#F7FAFC' : '#2D3748',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '20px',
-                transition: 'all 0.3s ease',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            }}
+            className="
+                relative
+
+                w-14
+                h-8
+
+                rounded-full
+
+                border
+                border-[var(--border)]
+
+                bg-[var(--surface-2)]
+
+                flex
+                items-center
+
+                px-1
+
+                transition-all
+                duration-300
+
+                shadow-sm
+
+                overflow-hidden
+
+                shrink-0
+            "
         >
-            {isDark ? '🌙' : '☀️'}
+            {/* TOGGLE BALL */}
+            <div
+                className={`
+                    w-6
+                    h-6
+
+                    rounded-full
+
+                    flex
+                    items-center
+                    justify-center
+
+                    text-[13px]
+
+                    shadow-md
+
+                    transition-all
+                    duration-300
+
+                    ${
+                        isDark
+                            ? `
+                                translate-x-6
+                                bg-blue-500
+                                text-white
+                              `
+                            : `
+                                translate-x-0
+                                bg-yellow-400
+                                text-black
+                              `
+                    }
+                `}
+            >
+                {isDark ? '🌙' : '☀️'}
+            </div>
         </button>
     );
 };

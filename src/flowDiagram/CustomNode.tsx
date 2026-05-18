@@ -1,6 +1,25 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 
+// Table Icon Component
+const TableIcon = ({ color }: { color: string }) => (
+    <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        style={{ display: 'inline-block', marginRight: '6px', verticalAlign: 'middle' }}
+    >
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="9" y1="3" x2="9" y2="21" />
+    </svg>
+);
+
 // Define the type for the data property of the node
 interface TableNodeData {
     tableName: string;
@@ -10,27 +29,38 @@ interface TableNodeData {
     highlightedColumnIds?: string[];
     onHandleInteraction?: (handleId: string, isHover: boolean) => void;
     onHoverColumn?: (columnId: string | null) => void;
+    theme?: {
+        background?: string;
+        border?: string;
+        primary?: string;
+        secondary?: string;
+        text?: string;
+    };
 }
 
 const CustomNode = ({ data, isConnectable, selected, style }: { data: TableNodeData, isConnectable: boolean, selected: boolean, style?: React.CSSProperties }) => {
     const highlightedColumnIds = data.highlightedColumnIds || [];
+    const primaryColor = data.theme?.primary || '#1e40af';
 
     return (
-        <div style={{ 
-            padding: 10, 
-            border: selected ? '2px solid #ff0072' : '1px solid #777', 
-            borderRadius: 4, 
-            background: '#fff', 
-            width: data.width || '250px',
-            transition: 'all 0.2s ease',
-            ...style
-        }}>
-            <div style={{ 
-                fontWeight: 'bold', 
-                marginBottom: 8, 
-                textAlign: 'center',
-                color: selected ? '#ff0072' : 'black'
-            }}>
+        <div 
+            className="p-3 bg-white rounded-lg shadow-lg transition-all duration-200 border-2 hover:shadow-xl"
+            style={{ 
+                borderColor: selected ? primaryColor : '#e5e7eb', 
+                width: data.width || '250px',
+                ...style
+            }}
+        >
+            <div className="flex items-center justify-center mb-4 text-center transition-colors duration-200"
+                style={{ 
+                    color: selected ? primaryColor : primaryColor,
+                    fontWeight: '700',
+                    fontSize: '14px',
+                    fontFamily: 'Segoe UI, -apple-system, BlinkMacSystemFont, sans-serif',
+                    letterSpacing: '0.3px'
+                }}
+            >
+                <TableIcon color={selected ? primaryColor : primaryColor} />
                 {data.tableName}
             </div>
             
@@ -42,14 +72,9 @@ const CustomNode = ({ data, isConnectable, selected, style }: { data: TableNodeD
                 return (
                     <div 
                         key={index} 
+                        className="relative mb-1.5 rounded-md px-0 py-1 transition-all duration-200 cursor-pointer hover:bg-opacity-100"
                         style={{ 
-                            position: 'relative', 
-                            marginBottom: 6,
-                            background: isHighlighted ? 'rgba(216, 25, 111, 0.2)' : 'transparent',
-                            borderRadius: 3,
-                            padding: '2px 0',
-                            transition: 'all 0.2s ease',
-                            cursor: 'pointer'
+                            background: isHighlighted ? `${primaryColor}26` : 'transparent',
                         }}
                         onClick={() => data.onHandleInteraction?.(sourceHandleId, false)}
                         onMouseEnter={() => data.onHoverColumn?.(columnId)}
@@ -61,11 +86,12 @@ const CustomNode = ({ data, isConnectable, selected, style }: { data: TableNodeD
                             id={targetHandleId}
                             style={{ 
                                 top: '50%', 
-                                background: isHighlighted ? '#ff0072' : '#555', 
+                                background: isHighlighted ? primaryColor : `${primaryColor}80`, 
                                 width: isHighlighted ? 12 : 10, 
                                 height: isHighlighted ? 12 : 10,
                                 transition: 'all 0.2s ease',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                boxShadow: isHighlighted ? `0 0 8px ${primaryColor}99` : `0 0 4px ${primaryColor}44`
                             }}
                             isConnectable={isConnectable}
                             onMouseEnter={() => data.onHandleInteraction?.(targetHandleId, true)}
@@ -75,16 +101,13 @@ const CustomNode = ({ data, isConnectable, selected, style }: { data: TableNodeD
                                 data.onHandleInteraction?.(targetHandleId, false);
                             }}
                         />
-                        <span style={{ 
-                            margin: '0 20px', 
-                            display: 'block', 
-                            whiteSpace: 'normal', 
-                            fontSize: '12px', 
-                            overflowWrap: 'break-word',
-                            fontWeight: isHighlighted ? 'bold' : 'normal',
-                            color: isHighlighted ? '#ff0072' : 'inherit',
-                            cursor: 'pointer'
-                        }}>
+                        <span className="block mx-5 text-xs whitespace-normal break-words transition-all duration-200"
+                            style={{ 
+                                fontWeight: isHighlighted ? '600' : '400',
+                                color: '#000000',
+                                cursor: 'pointer'
+                            }}
+                        >
                             {name}
                         </span>
                         <Handle
@@ -93,11 +116,12 @@ const CustomNode = ({ data, isConnectable, selected, style }: { data: TableNodeD
                             id={sourceHandleId}
                             style={{ 
                                 top: '50%', 
-                                background: isHighlighted ? '#ff0072' : '#555', 
+                                background: isHighlighted ? primaryColor : `${primaryColor}80`, 
                                 width: isHighlighted ? 12 : 10, 
                                 height: isHighlighted ? 12 : 10,
                                 transition: 'all 0.2s ease',
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                boxShadow: isHighlighted ? `0 0 8px ${primaryColor}99` : `0 0 4px ${primaryColor}44`
                             }}
                             isConnectable={isConnectable}
                             onMouseEnter={() => data.onHandleInteraction?.(sourceHandleId, true)}

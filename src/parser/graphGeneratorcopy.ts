@@ -2,7 +2,7 @@ import { Parser } from "node-sql-parser";
 import type { Graph, TableNode } from './types';
 import { astToGraph } from './astWalker';
 
-function assignPositionsWithTopologicalSort(
+export function assignPositionsWithTopologicalSort(
   nodes: TableNode[], 
   edges: { 
     id: string; 
@@ -100,7 +100,7 @@ function assignPositionsWithTopologicalSort(
       });
     }
   });
-  
+  console.log("---------------->",nodes)
   return nodes.map(node => ({
     ...node,
     position: {
@@ -214,10 +214,10 @@ export function getAllTableNodesAsTableNodes(graph: Graph): TableNode[] {
     const nodes = Array.from(uniqueNodes.values());
     
     // Calculate positions
-    const edges = getFilteredEdges(graph);
-    console.log('Filtered nodes:', nodes);
-    console.log('Filtered edges:', edges);
-    return assignPositionsWithTopologicalSort(nodes, edges);
+    // const edges = getFilteredEdges(graph);
+    // console.log('Filtered nodes:', nodes);
+    // console.log('Filtered edges:', edges);
+    return nodes;
 }
 export function getFilteredEdges(graph: Graph): { 
   id: string; 

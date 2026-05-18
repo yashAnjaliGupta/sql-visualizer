@@ -37,6 +37,7 @@ export interface Edge {
     style?: React.CSSProperties;
     animated?: boolean;
     selected?: boolean;
+    markerStart?: string;
 }
 
 interface FlowDiagramProps {
@@ -83,13 +84,17 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
                         );
                     }
         },
-        onHoverColumn
+        onHoverColumn,
+        theme
             }
         }));
         
         setNodes(nodesWithHandlers);
-        setEdges(tableEdges);
-    }, [tableNodes, tableEdges]);
+        setEdges(tableEdges.map(edge => ({
+            ...edge,
+            markerStart: 'url(#arrowhead)'
+        })));
+    }, [tableNodes, tableEdges, theme]);
     
     // Highlighting effect with simplified logic
     useEffect(() => {
@@ -270,8 +275,8 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
                     return {
                         ...edge,
                         style: { 
-                            stroke: '#ff0072', 
-                            strokeWidth: 3,
+                            stroke: theme?.primary || '#ff0072', 
+                            strokeWidth: 5,
                             opacity: 1 
                         },
                         animated: true,
@@ -286,7 +291,7 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
                 };
             }));
         });
-    }, [activeElement, edges]); 
+    }, [activeElement, edges, theme]); 
 
     // Simplified event handlers
     const onNodesChange = useCallback(
@@ -349,7 +354,7 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
         },
         edgeStyle: {
             stroke: theme?.primary || '#4CAF50',
-            strokeWidth: 2,
+            strokeWidth: 4,
             transition: 'all 0.3s ease'
         },
         minimap: {
@@ -389,10 +394,10 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
             }
         },
         highlightedEdge: {
-            stroke: '#FF0072',
-            strokeWidth: 3,
+            stroke: theme?.primary || '#FF0072',
+            strokeWidth: 5,
             opacity: 1,
-            filter: 'drop-shadow(0 0 8px #FF0072)'
+            filter: `drop-shadow(0 0 8px ${theme?.primary || '#FF0072'})`
         }
     };
 
@@ -447,6 +452,38 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
                     pannable
                 />
             </ReactFlow>
+            
+            <style>
+                {`
+                    .react-flow__controls {
+                        background-color: ${theme?.secondary || '#2D3748'}cc;
+                        backdrop-filter: blur(8px);
+                        border-radius: 8px;
+                        padding: 8px;
+                        gap: 8px;
+                        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+                    }
+                    
+                    .react-flow__controls-button {
+                        background-color: transparent;
+                        border: 1px solid ${theme?.border || '#4A5568'};
+                        border-radius: 6px;
+                        padding: 8px;
+                        color: ${theme?.text || '#E0E0E0'};
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .react-flow__controls-button:hover {
+                        background-color: ${theme?.primary || '#4CAF50'}33;
+                        transform: translateY(-1px);
+                    }
+                    
+                    .react-flow__controls-button:active {
+                        transform: translateY(0px);
+                    }
+                `}
+            </style>
         </div>
     );
 }

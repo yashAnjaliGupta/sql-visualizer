@@ -244,10 +244,10 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
                     w-[420px]
                     flex
                     flex-col
-                    rounded-lg
+                    rounded-xl
                     overflow-hidden
                     border
-                    shadow-lg
+                    shadow-2xl
                 `}
         style={{
           backgroundColor: theme?.background || "#1A202C",
@@ -262,8 +262,8 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
                         flex
                         items-center
                         justify-between
-                        px-3
-                        py-2
+                        px-4
+                        py-3
                         border-b
                         shrink-0
                     "
@@ -299,8 +299,8 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
 
           <span
             className="
-                            text-sm
-                            font-semibold
+                            text-base
+                            font-bold
                             tracking-wide
                         "
             style={{
@@ -322,13 +322,15 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
             <button
               onClick={handleBeautify}
               className="
-                                px-3
-                                py-1.5
+                                px-3.5
+                                py-2
                                 text-sm
-                                rounded-md
+                                font-semibold
+                                rounded-lg
                                 border
-                                transition-colors
-                                hover:opacity-80
+                                transition-all
+                                hover:shadow-md
+                                hover:opacity-90
                             "
               style={{
                 backgroundColor: theme?.secondary || "#2D3748",
@@ -344,17 +346,20 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
             <button
               onClick={handleSubmit}
               className="
-                                px-3
-                                py-1.5
+                                px-3.5
+                                py-2
                                 text-sm
-                                rounded-md
-                                transition-colors
-                                hover:opacity-80
+                                font-bold
+                                rounded-lg
+                                transition-all
+                                hover:shadow-lg
+                                hover:opacity-90
                             "
               style={{
-                backgroundColor: theme?.primary || "#4A5568",
+                backgroundColor: theme?.primary || "#3B82F6",
 
-                color: theme?.text || "#FFFFFF",
+                color: "#FFFFFF",
+                boxShadow: `0 4px 12px ${theme?.primary || "#3B82F6"}40`,
               }}
             >
               Execute
