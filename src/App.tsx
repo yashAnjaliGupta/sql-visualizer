@@ -77,10 +77,10 @@ ORDER BY o.created_at DESC;`);
                         <DatabaseSelector value={databaseType} onChange={handleDatabaseChange}theme={theme}/>
                     </div>
                     {/* CONTENT AREA */}
-                    <div className="flex flex-1 gap-4 relative overflow-hidden min-h-0 min-w-0">
+                    <div className="flex flex-col md:flex-row flex-1 gap-4 relative overflow-hidden min-h-0 min-w-0">
                         {/* LEFT PANEL */}
                         <div
-                            style={styles.codeInputWrapper} className=" h-fullshrink-0 flex flex-col overflow-hidden min-h-0">{isCodeInputCollapsed ? (
+                            style={styles.codeInputWrapper} className="w-full md:w-[320px] h-auto md:h-full shrink-0 flex flex-col overflow-hidden min-h-0">{isCodeInputCollapsed ? (
                                 <button onClick={() =>
                                         setIsCodeInputCollapsed(false)
                                     }style={styles.showCodeButton}>
@@ -104,7 +104,7 @@ ORDER BY o.created_at DESC;`);
                         {/* RIGHT PANEL */}
                         <div
                             style={styles.diagramContainer}
-                            className="flex-1 h-full min-w-0 min-h-0 overflow-hidden flex flex-col">
+                            className="flex-1 w-full h-full min-w-0 min-h-0 overflow-hidden flex flex-col">
                             {isError ? (
                                 <div style={styles.errorContainer}>
                                     <h3 style={{

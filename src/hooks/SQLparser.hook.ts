@@ -1,4 +1,4 @@
-import { assignPositionsWithTopologicalSort, codeToAst, getAllTableNodesAsTableNodes, getFilteredEdges, sqlAstToGraph } from '../parser/graphGeneratorcopy';
+import { assignPositionsWithTopologicalSort, codeToAst, getAllTableNodesAsTableNodes, getFilteredEdges, sqlAstToGraph } from '../parser/graphGenerator';
 import { useState,useEffect, useCallback } from 'react';
 import { buildColumnHighlightMap } from '../parser/locResolver';
 
@@ -36,7 +36,7 @@ export const useSQLParser=(input:string,databaseType:string)=>{
 
                 // Format the expected tokens in a more readable way
                 const expectedArray = (newAst as AstError)?.expected ?? [];
-                const expectedTokens = Array.isArray(expectedArray) && expectedArray.length > 0
+                Array.isArray(expectedArray) && expectedArray.length > 0
                     ? expectedArray
                         .filter(exp => exp.type === 'literal')
                         .map(exp => exp.text)

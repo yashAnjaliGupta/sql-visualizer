@@ -304,7 +304,7 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
         []
     );
 
-    const onEdgeMouseEnter = useCallback((event: React.MouseEvent, edge: ReactFlowEdge) => {
+    const onEdgeMouseEnter = useCallback((_event: React.MouseEvent, edge: ReactFlowEdge) => {
         // Only set hover if no selection is active
         if (!activeElement || activeElement.isHovered) {
             setActiveElement({ type: 'edge', id: edge.id, isHovered: true });
@@ -317,7 +317,7 @@ export default function FlowDiagram({ tableNodes, tableEdges, theme, style, onHo
         );
     }, []);
 
-    const onEdgeClick = useCallback((event: React.MouseEvent, edge: ReactFlowEdge) => {
+    const onEdgeClick = useCallback((_event: React.MouseEvent, edge: ReactFlowEdge) => {
         setActiveElement(prev => 
             prev && prev.type === 'edge' && prev.id === edge.id && !prev.isHovered
                 ? null  // Deselect if already selected

@@ -41,7 +41,7 @@ const resultName =
 
   // Set ops
   if (ast._next) {
-    const { op, parts } = collectSetChain(ast);
+    const {  parts } = collectSetChain(ast);
     const unionId = resultId; // union collapses into result node
     const unionName = resultName;
     for (let i = 0; i < parts.length; i++) {

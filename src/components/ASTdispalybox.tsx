@@ -1,5 +1,5 @@
 import React from 'react';
-import { codeToAst } from '../parser/graphGeneratorcopy';
+import { codeToAst } from '../parser/graphGenerator';
 
 interface ASTDisplayBoxProps {
     input: string;
