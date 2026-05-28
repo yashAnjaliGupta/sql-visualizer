@@ -100,7 +100,6 @@ export function assignPositionsWithTopologicalSort(
       });
     }
   });
-  console.log("---------------->",nodes)
   return nodes.map(node => ({
     ...node,
     position: {
@@ -162,7 +161,7 @@ export function codeToAst(code: string, database: string): any {
       parseOptions: { includeLocations: true },
     };
     const ast = parser.astify(code, options);
-    console.log('LOC', ast);
+    // console.log('LOC', ast);
     return ast;
   } catch (error) {
     return error;
@@ -201,10 +200,20 @@ export function getAllTableNodesAsTableNodes(graph: Graph): TableNode[] {
                 tableName: node.name || '',
         columns: Object.values(graph.nodes)
           .filter(colNode => colNode.tableId === node.id)
-          .map(colNode => ({
-            name: (colNode.name as string) || '',
-            columnId: colNode.id
-          }))
+          .map(colNode => {
+            // Safely convert column name to string, handling objects from different parsers
+            let columnName = '';
+            if (typeof colNode.name === 'string') {
+              columnName = colNode.name;
+            } else if (typeof colNode.name === 'object' && colNode.name !== null) {
+              // Fallback: convert object to string representation (avoid rendering object)
+              columnName = JSON.stringify(colNode.name).substring(0, 50);
+            }
+            return {
+              name: columnName || 'unknown',
+              columnId: colNode.id
+            };
+          })
             },
             position: { x: 0, y: 0 }
         });

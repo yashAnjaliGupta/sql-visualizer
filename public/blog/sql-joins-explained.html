@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Joins Explained: INNER, LEFT, RIGHT, FULL OUTER - Complete Guide</title>
+    <meta name="description" content="Complete guide to SQL joins. Learn INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN with examples. Use SQL Visualizer to see join relationships visually.">
+    <meta name="keywords" content="SQL joins, INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN, SQL tutorial, database joins, join types">
+    <meta property="og:title" content="SQL Joins Explained: Complete Guide with Examples">
+    <meta property="og:description" content="Master SQL joins with visual examples and interactive diagrams using SQL Visualizer.">
+    <meta property="og:url" content="https://sqlvisualizer.yashguptaiiit.in/blog/sql-joins-explained/">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SQL Joins Explained: Complete Guide">
+    <meta name="twitter:description" content="Master SQL joins with visual examples and interactive diagrams.">
+    <link rel="canonical" href="https://sqlvisualizer.yashguptaiiit.in/blog/sql-joins-explained/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        h1 { font-size: 2.5em; margin-bottom: 20px; color: #1e40af; }
+        h2 { font-size: 1.8em; margin: 30px 0 15px; color: #1e40af; }
+        p { margin-bottom: 15px; font-size: 1.05em; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre {  color: black; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; font-size: 0.9em; }
+        .cta { background: #1e40af; color: white; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .cta a { color: white; text-decoration: none; font-weight: bold; font-size: 1.1em; }
+        .example { background: #f9f9f9; padding: 15px; border-left: 4px solid #1e40af; margin: 20px 0; }
+        li { margin-left: 20px; margin-bottom: 10px; }
+        ul { margin-bottom: 20px; }
+        article { line-height: 1.8; }
+        time { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <article>
+            <h1>SQL Joins Explained: Complete Guide to All Join Types</h1>
+            <p><time>Published: May 29, 2026</time></p>
+
+            <p>SQL joins are one of the most powerful and essential features of relational databases. They allow you to combine rows from multiple tables based on related columns. Whether you're a beginner or experienced developer, understanding joins is critical for writing efficient database queries.</p>
+
+            <h2>What is a SQL Join?</h2>
+            <p>A SQL JOIN clause is used to combine rows from two or more tables based on a common column (foreign key relationship). Instead of retrieving data from one table at a time, joins let you retrieve related data from multiple tables in a single query.</p>
+
+            <h2>Types of SQL Joins</h2>
+
+            <h3>1. INNER JOIN</h3>
+            <p>Returns only rows that have matching values in both tables.</p>
+            <div class="example">
+                <pre><code>SELECT users.name, orders.order_id
+FROM users
+INNER JOIN orders ON users.id = orders.user_id;</code></pre>
+            </div>
+            <p>This query returns only users who have placed orders. Users with no orders are excluded.</p>
+
+            <h3>2. LEFT JOIN (LEFT OUTER JOIN)</h3>
+            <p>Returns all rows from the left table, with matching rows from the right table. If no match exists, NULL values appear for the right table columns.</p>
+            <div class="example">
+                <pre><code>SELECT users.name, orders.order_id
+FROM users
+LEFT JOIN orders ON users.id = orders.user_id;</code></pre>
+            </div>
+            <p>This query returns all users, including those without any orders (which show NULL for order_id).</p>
+
+            <h3>3. RIGHT JOIN (RIGHT OUTER JOIN)</h3>
+            <p>Returns all rows from the right table, with matching rows from the left table. The opposite of LEFT JOIN.</p>
+            <div class="example">
+                <pre><code>SELECT users.name, orders.order_id
+FROM users
+RIGHT JOIN orders ON users.id = orders.user_id;</code></pre>
+            </div>
+
+            <h3>4. FULL OUTER JOIN</h3>
+            <p>Returns all rows from both tables, with NULL values where there's no match.</p>
+            <div class="example">
+                <pre><code>SELECT users.name, orders.order_id
+FROM users
+FULL OUTER JOIN orders ON users.id = orders.user_id;</code></pre>
+            </div>
+
+            <h3>5. CROSS JOIN</h3>
+            <p>Returns the Cartesian product of two tables (all possible combinations).</p>
+            <div class="example">
+                <pre><code>SELECT users.name, products.product_name
+FROM users
+CROSS JOIN products;</code></pre>
+            </div>
+
+            <h2>Best Practices for SQL Joins</h2>
+            <ul>
+                <li>Always use explicit join types (INNER, LEFT, etc.) instead of implicit joins</li>
+                <li>Index the columns used in ON clauses for better performance</li>
+                <li>Use table aliases to make queries more readable: <code>FROM users u JOIN orders o ON u.id = o.user_id</code></li>
+                <li>Avoid joining on computed columns or functions when possible</li>
+                <li>Use LEFT JOIN when you want to keep all rows from the primary table</li>
+            </ul>
+
+            <h2>Visualize Your SQL Joins</h2>
+            <p>Understanding how joins work can be challenging when reading complex SQL queries. That's where <strong>SQL Visualizer</strong> comes in!</p>
+            
+            <div class="cta">
+                <p>Try SQL Visualizer to see your joins as interactive diagrams!</p>
+                <a href="https://sqlvisualizer.yashguptaiiit.in/">Visualize SQL Joins Now →</a>
+            </div>
+
+            <p>SQL Visualizer automatically creates visual flow diagrams showing:</p>
+            <ul>
+                <li>Which tables are being joined</li>
+                <li>The join conditions (ON clauses)</li>
+                <li>Table relationships and data flow</li>
+                <li>Column mappings and dependencies</li>
+            </ul>
+
+            <h2>Common Join Mistakes to Avoid</h2>
+            <ul>
+                <li><strong>Forgetting the ON clause:</strong> This creates a CROSS JOIN by accident</li>
+                <li><strong>Wrong join type:</strong> Using INNER JOIN when LEFT JOIN is needed</li>
+                <li><strong>Unclear join conditions:</strong> Complex ON clauses without parentheses</li>
+                <li><strong>N+1 queries:</strong> Using multiple queries instead of one join</li>
+            </ul>
+
+            <h2>Conclusion</h2>
+            <p>SQL joins are fundamental to working with relational databases. Master the different join types and use SQL Visualizer to understand your query structures better. Happy querying!</p>
+        </article>
+    </div>
+</body>
+</html>

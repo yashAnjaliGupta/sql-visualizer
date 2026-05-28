@@ -11,6 +11,23 @@ interface DatabaseSelectorProps {
 }
 
 const DatabaseSelector: React.FC<DatabaseSelectorProps> = ({ value, onChange, theme }) => {
+    const sqlFlavors = [
+        { label: 'T-SQL (SQL Server)', value: 'TransactSQL' },
+        { label: 'MySQL', value: 'MySQL' },
+        { label: 'MariaDB', value: 'MariaDB' },
+        // { label: 'PostgreSQL', value: 'PostgresQL' },
+        { label: 'SQLite', value: 'Sqlite' },
+        { label: 'Oracle', value: 'Oracle' },
+        // { label: 'Redshift', value: 'Redshift' },
+        { label: 'Hive', value: 'Hive' },
+        { label: 'DB2', value: 'DB2' },
+        { label: 'BigQuery', value: 'BigQuery' },
+        { label: 'Athena', value: 'Athena' },
+        { label: 'Flink SQL', value: 'FlinkSQL' },
+        { label: 'Snowflake', value: 'Snowflake' },
+        { label: 'NoQL', value: 'Noql' },
+    ];
+
     const styles = {
         container: {
             marginBottom: '15px',
@@ -48,10 +65,11 @@ const DatabaseSelector: React.FC<DatabaseSelectorProps> = ({ value, onChange, th
                 onChange={(e) => onChange(e.target.value)}
                 style={styles.select}
             >
-                <option value="Transactsql">T-SQL</option>
-                <option value="MySQL">MySQL</option>
-                <option value="PostgreSQL">PostgreSQL</option>
-                <option value="Oracle">Oracle</option>
+                {sqlFlavors.map(flavor => (
+                    <option key={flavor.value} value={flavor.value}>
+                        {flavor.label}
+                    </option>
+                ))}
             </select>
         </div>
     );

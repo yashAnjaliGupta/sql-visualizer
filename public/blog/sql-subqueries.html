@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Subqueries - Complete Guide with Examples</title>
+    <meta name="description" content="Master SQL subqueries: scalar, inline views, correlated subqueries. Learn WHERE, FROM, SELECT subqueries with examples. Visualize complex subquery logic with SQL Visualizer.">
+    <meta name="keywords" content="SQL subqueries, nested queries, correlated subqueries, scalar subqueries, SQL tutorial">
+    <meta property="og:title" content="SQL Subqueries: Complete Guide">
+    <meta property="og:description" content="Learn all types of SQL subqueries with practical examples and visual explanations.">
+    <meta property="og:url" content="https://sqlvisualizer.yashguptaiiit.in/blog/sql-subqueries/">
+    <meta property="og:type" content="article">
+    <link rel="canonical" href="https://sqlvisualizer.yashguptaiiit.in/blog/sql-subqueries/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        h1 { font-size: 2.5em; margin-bottom: 20px; color: #d97706; }
+        h2 { font-size: 1.8em; margin: 30px 0 15px; color: #d97706; }
+        h3 { font-size: 1.3em; margin: 20px 0 10px; color: #d97706; }
+        p { margin-bottom: 15px; font-size: 1.05em; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre {color: black; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; font-size: 0.9em; }
+        .cta { background: #d97706; color: white; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .cta a { color: white; text-decoration: none; font-weight: bold; font-size: 1.1em; }
+        .example { background: #f9f9f9; padding: 15px; border-left: 4px solid #d97706; margin: 20px 0; }
+        li { margin-left: 20px; margin-bottom: 10px; }
+        ul { margin-bottom: 20px; }
+        article { line-height: 1.8; }
+        time { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <article>
+            <h1>SQL Subqueries - Complete Guide with Real Examples</h1>
+            <p><time>Published: May 29, 2026</time></p>
+
+            <p>Subqueries are one of SQL's most powerful features, allowing you to nest queries within queries. They're essential for solving complex data problems and can make your SQL code more modular and easier to understand.</p>
+
+            <h2>What is a Subquery?</h2>
+            <p>A subquery (also called an inner query or nested query) is a query within another query. Subqueries are used to return data that will be used by the main query. They can appear in various clauses: WHERE, FROM, SELECT, or HAVING.</p>
+
+            <h2>Types of Subqueries</h2>
+
+            <h3>1. Scalar Subqueries</h3>
+            <p>Return a single value (one row, one column) and can be used anywhere a single value is expected.</p>
+            <div class="example">
+                <pre><code>SELECT 
+    customer_id,
+    order_id,
+    amount,
+    (SELECT AVG(amount) FROM orders) AS avg_order_amount
+FROM orders
+WHERE amount > (SELECT AVG(amount) FROM orders);</code></pre>
+            </div>
+
+            <h3>2. Row Subqueries</h3>
+            <p>Return a single row with multiple columns.</p>
+            <div class="example">
+                <pre><code>SELECT * FROM employees
+WHERE (department_id, salary) = 
+    (SELECT department_id, MAX(salary)
+     FROM employees
+     GROUP BY department_id);</code></pre>
+            </div>
+
+            <h3>3. Table Subqueries (Inline Views)</h3>
+            <p>Return multiple rows and columns, used in the FROM clause.</p>
+            <div class="example">
+                <pre><code>SELECT department, avg_salary
+FROM (
+    SELECT 
+        department,
+        AVG(salary) AS avg_salary
+    FROM employees
+    GROUP BY department
+) department_summary
+WHERE avg_salary > 50000;</code></pre>
+            </div>
+
+            <h2>Subquery Placement</h2>
+
+            <h3>WHERE Clause Subquery</h3>
+            <p>Filter main query results based on subquery results.</p>
+            <div class="example">
+                <pre><code>SELECT customer_id, customer_name
+FROM customers
+WHERE customer_id IN 
+    (SELECT customer_id FROM orders WHERE amount > 1000);</code></pre>
+            </div>
+
+            <h3>FROM Clause Subquery (Inline View)</h3>
+            <p>Use subquery results as a temporary table.</p>
+            <div class="example">
+                <pre><code>SELECT ranked_customers.customer_id, ranked_customers.rank
+FROM (
+    SELECT 
+        customer_id,
+        ROW_NUMBER() OVER (ORDER BY amount DESC) AS rank
+    FROM orders
+) ranked_customers
+WHERE ranked_customers.rank <= 10;</code></pre>
+            </div>
+
+            <h3>SELECT Clause Subquery</h3>
+            <p>Add computed columns based on subqueries.</p>
+            <div class="example">
+                <pre><code>SELECT 
+    customer_id,
+    customer_name,
+    (SELECT COUNT(*) FROM orders WHERE orders.customer_id = customers.customer_id) AS order_count
+FROM customers;</code></pre>
+            </div>
+
+            <h2>Correlated Subqueries</h2>
+            <p>A correlated subquery references columns from the outer query. It executes once for each row processed by the outer query.</p>
+            
+            <div class="example">
+                <pre><code>SELECT 
+    e1.employee_name,
+    e1.salary
+FROM employees e1
+WHERE e1.salary > (
+    SELECT AVG(e2.salary)
+    FROM employees e2
+    WHERE e2.department_id = e1.department_id
+);</code></pre>
+            </div>
+
+            <p>This query finds employees whose salary is above the average for their department.</p>
+
+            <h2>Subquery Operators</h2>
+            <ul>
+                <li><code>IN</code> - Check if value exists in subquery results</li>
+                <li><code>NOT IN</code> - Check if value doesn't exist in subquery results</li>
+                <li><code>EXISTS</code> - Check if subquery returns any rows</li>
+                <li><code>NOT EXISTS</code> - Check if subquery returns no rows</li>
+                <li><code>ANY</code> - Compare value to any value in subquery results</li>
+                <li><code>ALL</code> - Compare value to all values in subquery results</li>
+            </ul>
+
+            <h2>EXISTS vs IN</h2>
+            <p>Both check for row existence, but <code>EXISTS</code> is often faster:</p>
+            <div class="example">
+                <pre><code>-- Using IN (checks all values)
+SELECT customer_id FROM customers
+WHERE customer_id IN (SELECT customer_id FROM orders);
+
+-- Using EXISTS (stops at first match)
+SELECT customer_id FROM customers c
+WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id);</code></pre>
+            </div>
+
+            <h2>Subquery vs JOIN</h2>
+            <p>Often, subqueries can be replaced with JOINs for better performance:</p>
+            <div class="example">
+                <pre><code>-- Subquery approach
+SELECT customer_id FROM customers
+WHERE customer_id IN (SELECT customer_id FROM orders);
+
+-- JOIN approach (usually faster)
+SELECT DISTINCT c.customer_id FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id;</code></pre>
+            </div>
+
+            <h2>Visualize Your Subqueries</h2>
+            <p>Complex subqueries with multiple nesting levels can be hard to understand. <strong>SQL Visualizer</strong> shows you the data flow and relationships between your subqueries and main query.</p>
+            
+            <div class="cta">
+                <p>Understand your subquery structure visually!</p>
+                <a href="https://sqlvisualizer.yashguptaiiit.in/">Visualize Subqueries Now →</a>
+            </div>
+
+            <h2>Subquery Best Practices</h2>
+            <ul>
+                <li>Use meaningful aliases for subqueries</li>
+                <li>Prefer JOINs when they're more efficient</li>
+                <li>Avoid excessive nesting (limit to 3-4 levels)</li>
+                <li>Use EXISTS instead of IN for large result sets</li>
+                <li>Consider CTEs for complex nested queries</li>
+                <li>Index columns used in subquery joins</li>
+            </ul>
+
+            <h2>Common Subquery Mistakes</h2>
+            <ul>
+                <li>Forgetting to alias the subquery in FROM clause</li>
+                <li>Using <code>=</code> instead of <code>IN</code> when subquery returns multiple rows</li>
+                <li>Not understanding the difference between <code>EXISTS</code> and <code>IN</code></li>
+                <li>Over-using correlated subqueries (can be slow)</li>
+            </ul>
+
+            <h2>Conclusion</h2>
+            <p>Subqueries are a crucial SQL skill. Whether you're filtering data, creating temporary views, or performing complex calculations, mastering subqueries will make you a better SQL developer. Start with simple subqueries and gradually work your way to more complex nested queries!</p>
+        </article>
+    </div>
+</body>
+</html>

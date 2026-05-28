@@ -104,7 +104,17 @@ const resultName =
     const defaultFrom = defaultFromRaw ? (ctx.aliases.resolve(defaultFromRaw) || defaultFromRaw) : undefined;
     ast.columns.forEach((col: any) => {
       if (col.expr?.type === 'star') return;
-      const outName = col.as || (col.expr?.type === 'column_ref' ? col.expr.column : `expr_${Math.random().toString(36).slice(2,7)}`);
+      // Safely extract column name: handle col.as being string, object with value, or expr property
+      let outName: string;
+      if (typeof col.as === 'string') {
+        outName = col.as;
+      } else if (col.as?.value && typeof col.as.value === 'string') {
+        outName = col.as.value;
+      } else if (col.expr?.type === 'column_ref' && typeof col.expr.column === 'string') {
+        outName = col.expr.column;
+      } else {
+        outName = `expr_${Math.random().toString(36).slice(2,7)}`;
+      }
       ctx.builder.ensureColumn(resultName, outName);
 
       // If this SELECT item is a subquery, process it and map its columns to this output column

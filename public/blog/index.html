@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Blog - Learning Resources for Database Queries</title>
+    <meta name="description" content="SQL learning blog with guides on joins, CTEs, subqueries, and database optimization. Master SQL with practical examples and visual explanations.">
+    <meta name="keywords" content="SQL blog, SQL tutorial, SQL joins, SQL CTEs, SQL subqueries, database learning, SQL guide">
+    <meta property="og:title" content="SQL Blog - Learn Queries and Database Concepts">
+    <meta property="og:description" content="Free SQL tutorials and guides for developers. Master joins, CTEs, subqueries, and more.">
+    <meta property="og:url" content="https://sqlvisualizer.yashguptaiiit.in/blog/">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://sqlvisualizer.yashguptaiiit.in/blog/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        header { background: white; padding: 40px 20px; border-bottom: 3px solid #1e40af; margin-bottom: 40px; }
+        h1 { font-size: 2.5em; color: #1e40af; margin-bottom: 10px; }
+        .subtitle { font-size: 1.1em; color: #666; margin-bottom: 20px; }
+        nav { background: white; padding: 20px; border-radius: 8px; margin-bottom: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        nav a { display: inline-block; margin-right: 20px; color: #1e40af; text-decoration: none; font-weight: 500; }
+        nav a:hover { text-decoration: underline; }
+        .blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .blog-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s; }
+        .blog-card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+        .blog-card-header { padding: 20px; background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; }
+        .blog-card-title { font-size: 1.4em; font-weight: 600; margin-bottom: 10px; }
+        .blog-card-meta { font-size: 0.9em; opacity: 0.9; }
+        .blog-card-body { padding: 20px; }
+        .blog-card-excerpt { color: #666; margin-bottom: 15px; font-size: 0.95em; line-height: 1.6; }
+        .blog-card-link { display: inline-block; color: #1e40af; text-decoration: none; font-weight: 600; padding: 8px 12px; border: 2px solid #1e40af; border-radius: 4px; transition: all 0.3s; }
+        .blog-card-link:hover { background: #1e40af; color: white; }
+        .featured-section { background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; padding: 40px; border-radius: 8px; margin-bottom: 40px; }
+        .featured-section h2 { font-size: 1.8em; margin-bottom: 15px; }
+        .featured-section p { font-size: 1.05em; line-height: 1.8; margin-bottom: 20px; }
+        .featured-section a { display: inline-block; background: white; color: #1e40af; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: 600; }
+        .featured-section a:hover { opacity: 0.9; }
+        .categories { background: white; padding: 30px; border-radius: 8px; margin-bottom: 40px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .categories h3 { font-size: 1.4em; margin-bottom: 20px; color: #1e40af; }
+        .category-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .category-tag { background: #f0f0f0; padding: 8px 16px; border-radius: 20px; color: #333; text-decoration: none; transition: all 0.3s; }
+        .category-tag:hover { background: #1e40af; color: white; }
+        footer { text-align: center; padding: 40px 20px; color: #666; border-top: 1px solid #ddd; margin-top: 60px; }
+        footer a { color: #1e40af; text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SQL Learning Blog</h1>
+        <p class="subtitle">Master SQL queries, database optimization, and query visualization</p>
+    </header>
+
+    <div class="container">
+        <div class="featured-section">
+            <h2>Welcome to SQL Visualizer Blog</h2>
+            <p>Learn essential SQL concepts through comprehensive guides and practical examples. Understand joins, CTEs, subqueries, and complex query structures with detailed explanations and visual demonstrations.</p>
+            <a href="https://sqlvisualizer.yashguptaiiit.in/">Start Visualizing SQL Queries →</a>
+        </div>
+
+        <div class="categories">
+            <h3>Topics</h3>
+            <div class="category-list">
+                <a href="#" class="category-tag">Joins</a>
+                <a href="#" class="category-tag">CTEs</a>
+                <a href="#" class="category-tag">Subqueries</a>
+                <a href="#" class="category-tag">SQL Basics</a>
+                <a href="#" class="category-tag">Query Optimization</a>
+                <a href="#" class="category-tag">Database Design</a>
+            </div>
+        </div>
+
+        <div class="blog-grid">
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h2 class="blog-card-title">SQL Joins Explained</h2>
+                    <p class="blog-card-meta">Complete Guide to All Join Types</p>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-card-excerpt">Learn INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN with practical examples. Master SQL joins and understand table relationships like never before.</p>
+                    <a href="/blog/sql-joins-explained.html" class="blog-card-link">Read Article →</a>
+                </div>
+            </article>
+
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h2 class="blog-card-title">SQL CTEs Guide</h2>
+                    <p class="blog-card-meta">WITH Clause and Recursive Queries</p>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-card-excerpt">Discover Common Table Expressions (CTEs) and WITH clauses. Learn how to write cleaner, more readable queries with recursive and non-recursive CTEs.</p>
+                    <a href="/blog/sql-cte-guide.html" class="blog-card-link">Read Article →</a>
+                </div>
+            </article>
+
+            <article class="blog-card">
+                <div class="blog-card-header">
+                    <h2 class="blog-card-title">SQL Subqueries</h2>
+                    <p class="blog-card-meta">Nested Queries and Advanced Techniques</p>
+                </div>
+                <div class="blog-card-body">
+                    <p class="blog-card-excerpt">Master scalar, correlated, and inline view subqueries. Learn when to use subqueries vs joins and optimize your query performance.</p>
+                    <a href="/blog/sql-subqueries.html" class="blog-card-link">Read Article →</a>
+                </div>
+            </article>
+        </div>
+
+        <div class="featured-section">
+            <h2>Visualize Your Queries</h2>
+            <p>Each blog post includes practical examples that you can visualize using SQL Visualizer. See your SQL queries transformed into interactive diagrams that show table relationships, data flow, and query structure.</p>
+            <a href="https://sqlvisualizer.yashguptaiiit.in/">Try SQL Visualizer Free →</a>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 SQL Visualizer. All rights reserved.</p>
+            <p><a href="https://sqlvisualizer.yashguptaiiit.in/">← Back to Tool</a></p>
+        </footer>
+    </div>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "SQL Learning Blog",
+        "description": "SQL blog with tutorials and guides on joins, CTEs, subqueries, and database optimization",
+        "url": "https://sqlvisualizer.yashguptaiiit.in/blog/",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "SQL Visualizer",
+            "url": "https://sqlvisualizer.yashguptaiiit.in/"
+        }
+    }
+    </script>
+</body>
+</html>

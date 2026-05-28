@@ -87,6 +87,7 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
       console.log("Beautified SQL");
 
       setValue(formatted);
+      onSubmit(formatted);
     } catch (e) {
       console.log("Formatter failed:", e);
     }

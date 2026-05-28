@@ -56,24 +56,25 @@ export const useSQLParser=(input:string,databaseType:string)=>{
                 return;
             }
             const graphs = sqlAstToGraph(newAst);
-            console.log('jmd',graphs);
+            // console.log('jmd',graphs);
             const allNodes: TableNode[] = [];
             const allEdges: Array<{ id: string; source: string; target: string; sourceHandle: string; targetHandle: string }> = [];
+            const allHighlights: Record<string, any> = {};
 
             graphs.forEach((g) => {
                 allNodes.push(...getAllTableNodesAsTableNodes(g));
                 allEdges.push(...getFilteredEdges(g));
-                const map = buildColumnHighlightMap(input, newAst, g);
-                setColumnHighlights(map);
+                const map = buildColumnHighlightMap(sqlInput, newAst, g);
+                Object.assign(allHighlights, map);
             });
-
+            setColumnHighlights(allHighlights);
             // Apply positioning ONCE and set all state together
             const positionedNodes = assignPositionsWithTopologicalSort(allNodes, allEdges);
             setTableNodes(positionedNodes);
             setTableEdges(allEdges);
             setIsError(false);
             setErrorMessage('');
-            console.log(tableNodes,tableEdges);
+            // console.log(tableNodes,tableEdges);
             
         } catch (error) {
             setIsError(true);
@@ -84,7 +85,7 @@ export const useSQLParser=(input:string,databaseType:string)=>{
     useEffect(() => {
         processSQL(input, databaseType);
     }, [input,databaseType,processSQL]); // Run only once on mount
-    console.log(tableNodes);
+    // console.log(tableNodes);
     // setTableNodes(assignPositionsWithTopologicalSort(tableNodes,tableEdges))
     return {tableNodes,tableEdges,isError,errorMessage,columnHighlights}
 }

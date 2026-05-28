@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL CTEs (Common Table Expressions) - WITH Clause Guide</title>
+    <meta name="description" content="Complete guide to SQL CTEs (Common Table Expressions). Learn how to use WITH clauses for recursive queries and complex data transformations. Visualize CTE structures with SQL Visualizer.">
+    <meta name="keywords" content="SQL CTE, Common Table Expression, WITH clause, recursive CTE, SQL subqueries, SQL performance">
+    <meta property="og:title" content="SQL CTEs Explained: WITH Clause Guide">
+    <meta property="og:description" content="Master SQL Common Table Expressions (CTEs) and WITH clauses with visual examples.">
+    <meta property="og:url" content="https://sqlvisualizer.yashguptaiiit.in/blog/sql-cte-guide/">
+    <meta property="og:type" content="article">
+    <link rel="canonical" href="https://sqlvisualizer.yashguptaiiit.in/blog/sql-cte-guide/">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        h1 { font-size: 2.5em; margin-bottom: 20px; color: #7c3aed; }
+        h2 { font-size: 1.8em; margin: 30px 0 15px; color: #7c3aed; }
+        h3 { font-size: 1.3em; margin: 20px 0 10px; color: #7c3aed; }
+        p { margin-bottom: 15px; font-size: 1.05em; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre {  color: black; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; font-size: 0.9em; }
+        .cta { background: #7c3aed; color: white; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .cta a { color: white; text-decoration: none; font-weight: bold; font-size: 1.1em; }
+        .example { background: #f9f9f9; padding: 15px; border-left: 4px solid #7c3aed; margin: 20px 0; }
+        li { margin-left: 20px; margin-bottom: 10px; }
+        ul { margin-bottom: 20px; }
+        article { line-height: 1.8; }
+        time { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <article>
+            <h1>SQL CTEs (Common Table Expressions) - Complete WITH Clause Guide</h1>
+            <p><time>Published: May 29, 2026</time></p>
+
+            <p>Common Table Expressions (CTEs) are a powerful SQL feature that lets you create temporary named result sets. They make complex queries more readable and maintainable by breaking them into logical, reusable components.</p>
+
+            <h2>What is a CTE?</h2>
+            <p>A Common Table Expression (CTE) is a temporary named result set that exists only within the scope of a single statement. CTEs are defined using the WITH clause and can be referenced in SELECT, INSERT, UPDATE, or DELETE statements.</p>
+
+            <h2>Basic CTE Syntax</h2>
+            <div class="example">
+                <pre><code>WITH cte_name AS (
+    SELECT column1, column2
+    FROM source_table
+    WHERE condition
+)
+SELECT * FROM cte_name;</code></pre>
+            </div>
+
+            <h2>Non-Recursive CTEs</h2>
+            <p>Non-recursive CTEs are the simplest form and don't reference themselves.</p>
+            
+            <h3>Example: Monthly Sales Summary</h3>
+            <div class="example">
+                <pre><code>WITH monthly_sales AS (
+    SELECT 
+        MONTH(order_date) AS month,
+        YEAR(order_date) AS year,
+        SUM(amount) AS total_sales
+    FROM orders
+    GROUP BY MONTH(order_date), YEAR(order_date)
+)
+SELECT 
+    year,
+    month,
+    total_sales,
+    LAG(total_sales) OVER (ORDER BY year, month) AS previous_month_sales
+FROM monthly_sales;</code></pre>
+            </div>
+
+            <h2>Multiple CTEs</h2>
+            <p>You can define multiple CTEs and reference them together:</p>
+            <div class="example">
+                <pre><code>WITH customer_orders AS (
+    SELECT customer_id, COUNT(*) as order_count
+    FROM orders
+    GROUP BY customer_id
+),
+high_value_customers AS (
+    SELECT customer_id FROM customer_orders
+    WHERE order_count > 10
+)
+SELECT * FROM high_value_customers;</code></pre>
+            </div>
+
+            <h2>Recursive CTEs</h2>
+            <p>Recursive CTEs reference themselves and are useful for hierarchical data like organizational structures or category trees.</p>
+            
+            <h3>Syntax</h3>
+            <div class="example">
+                <pre><code>WITH RECURSIVE cte_name AS (
+    -- Anchor member (base case)
+    SELECT column1, column2, ... FROM table
+    WHERE condition
+    
+    UNION ALL
+    
+    -- Recursive member (recursive case)
+    SELECT column1, column2, ... FROM table
+    JOIN cte_name ON condition
+)
+SELECT * FROM cte_name;</code></pre>
+            </div>
+
+            <h3>Example: Organizational Hierarchy</h3>
+            <div class="example">
+                <pre><code>WITH RECURSIVE employee_hierarchy AS (
+    -- Anchor: Get all top-level employees (no manager)
+    SELECT employee_id, employee_name, manager_id, 1 AS level
+    FROM employees
+    WHERE manager_id IS NULL
+    
+    UNION ALL
+    
+    -- Recursive: Get employees under current level
+    SELECT e.employee_id, e.employee_name, e.manager_id, eh.level + 1
+    FROM employees e
+    INNER JOIN employee_hierarchy eh 
+        ON e.manager_id = eh.employee_id
+)
+SELECT * FROM employee_hierarchy
+ORDER BY level, employee_name;</code></pre>
+            </div>
+
+            <h2>CTE vs Subqueries vs Temporary Tables</h2>
+            <ul>
+                <li><strong>CTE:</strong> Readable, reusable within one statement, faster execution</li>
+                <li><strong>Subqueries:</strong> Inline queries, good for simple cases, less readable</li>
+                <li><strong>Temporary Tables:</strong> Persisted, reusable across statements, more overhead</li>
+            </ul>
+
+            <h2>Benefits of Using CTEs</h2>
+            <ul>
+                <li><strong>Improved readability:</strong> Break complex logic into named steps</li>
+                <li><strong>Reusability:</strong> Reference the same CTE multiple times</li>
+                <li><strong>Debugging:</strong> Easier to test each CTE independently</li>
+                <li><strong>Maintainability:</strong> Logical organization of query logic</li>
+                <li><strong>Performance:</strong> Often optimized better than subqueries</li>
+            </ul>
+
+            <h2>Visualize Your CTEs</h2>
+            <p>Complex CTE hierarchies can be hard to understand at first glance. Use <strong>SQL Visualizer</strong> to see how your CTEs relate to each other and to the source tables.</p>
+            
+            <div class="cta">
+                <p>Visualize your CTE structure and data flow instantly!</p>
+                <a href="https://sqlvisualizer.yashguptaiiit.in/">Try SQL Visualizer →</a>
+            </div>
+
+            <h2>CTE Best Practices</h2>
+            <ul>
+                <li>Use meaningful names for your CTEs (e.g., <code>monthly_sales</code> instead of <code>cte1</code>)</li>
+                <li>Limit recursion depth to avoid infinite loops in recursive CTEs</li>
+                <li>Use MAXRECURSION option to set upper limit: <code>OPTION(MAXRECURSION 100)</code></li>
+                <li>Test recursive CTEs incrementally to verify logic</li>
+                <li>Comment your CTE logic for future maintainers</li>
+            </ul>
+
+            <h2>Common Mistakes with CTEs</h2>
+            <ul>
+                <li>Forgetting the comma between multiple CTEs</li>
+                <li>Infinite loops in recursive CTEs (always add exit condition)</li>
+                <li>Using non-deterministic functions in recursive CTEs</li>
+                <li>Not setting MAXRECURSION limit (default is 100)</li>
+            </ul>
+
+            <h2>Conclusion</h2>
+            <p>CTEs are an essential tool for writing clean, maintainable SQL. Whether you're using them for simple data organization or complex recursive queries, they help make your SQL more understandable and efficient. Master CTEs and take your SQL skills to the next level!</p>
+        </article>
+    </div>
+</body>
+</html>
