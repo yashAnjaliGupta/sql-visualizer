@@ -57,7 +57,7 @@ const SelectSourceIcon = ({ color }: { color: string }) => (
 
 // ── single insert block ────────────────────────────────────────────────────
 
-const InsertBlock: React.FC<{ insert: InsertDef; theme: Theme; idx: number; maxRows: number }> = ({ insert, theme, idx, maxRows }) => {
+const InsertBlock: React.FC<{ insert: InsertDef; theme: Theme; maxRows: number }> = ({ insert, theme, maxRows }) => {
     const [expanded, setExpanded] = useState(false);
     const isDark = theme.isDark ?? true;
     const bg = theme.secondary || '#111827';
@@ -253,14 +253,8 @@ const InsertBlock: React.FC<{ insert: InsertDef; theme: Theme; idx: number; maxR
 // ── main view ──────────────────────────────────────────────────────────────
 
 const InsertView: React.FC<InsertViewProps> = ({ inserts, theme, maxRows = 50 }) => {
-    const isDark = theme.isDark ?? true;
     const bg = theme.background || '#0F172A';
-    const border = theme.border || '#334155';
-    const primary = theme.primary || '#3B82F6';
     const muted = theme.mutedText || '#94A3B8';
-
-    const accentColor = isDark ? '#a5b4fc' : '#6366f1';
-    const accentBg = isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.05)';
 
     if (inserts.length === 0) {
         return (
@@ -294,7 +288,7 @@ const InsertView: React.FC<InsertViewProps> = ({ inserts, theme, maxRows = 50 })
                 gap: '12px',
             }}>
                 {inserts.map((ins, i) => (
-                    <InsertBlock key={i} insert={ins} theme={theme} idx={i} maxRows={maxRows} />
+                    <InsertBlock key={i} insert={ins} theme={theme} maxRows={maxRows} />
                 ))}
             </div>
         </div>

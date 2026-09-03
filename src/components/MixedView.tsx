@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { CreateTableDef } from '../parser/ddlExtractor';
 import type { InsertDef } from '../parser/insertExtractor';
-import type { SelectGraph, TableNode, FlowEdge } from '../hooks/SQLparser.hook';
+import type { SelectGraph } from '../hooks/SQLparser.hook';
 import CreateTableView from './CreateTableView';
 import InsertView from './InsertView';
 import GroupedSelectView from './GroupedSelectView';
@@ -241,8 +241,6 @@ const MixedView: React.FC<MixedViewProps> = ({
     viewMode = 'per-statement',
     onHoverColumn, onHighlightColumns,
 }) => {
-    const isDark = theme.isDark ?? true;
-    const border = theme.border || '#334155';
 
     // ── GROUPED MODE ───────────────────────────────────────────────────────
     if (viewMode === 'grouped') {

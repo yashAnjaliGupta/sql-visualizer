@@ -256,9 +256,7 @@ const TableCard = ({ table, theme }: { table: CreateTableDef; theme: Theme }) =>
 // ── main view ──────────────────────────────────────────────────────────────
 
 const CreateTableView: React.FC<CreateTableViewProps> = ({ tables, theme }) => {
-    const isDark = theme.isDark ?? true;
     const bg = theme.background || '#0F172A';
-    const primary = theme.primary || '#3B82F6';
 
     if (tables.length === 0) {
         return (

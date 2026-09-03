@@ -87,8 +87,6 @@ ORDER BY o.created_at DESC;`);
                         {(statementType === 'mixed' || selectGraphs.length > 1) && (() => {
                             const isDark = isDarkMode;
                             const border = theme.border;
-                            const bg = theme.secondary;
-                            const text = theme.text;
                             const muted = theme.mutedText;
                             const primary = theme.primary;
                             const opts: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
