@@ -8,6 +8,7 @@ import InsertView from './components/InsertView';
 import MixedView from './components/MixedView';
 import Header from './components/Header';
 
+
 import { getTheme, getStyles } from './styles/app.styles';
 
 import { useSQLParser } from './hooks/SQLparser.hook';
@@ -81,7 +82,7 @@ ORDER BY o.created_at DESC;`);
                 <div className=" flex flex-col flex-1 gap-4 overflow-hidden">
                     {/* CONTROLS */}
                     <div className=" flex items-center gap-4 h-14 shrink-0">
-                        <DatabaseSelector value={databaseType} onChange={handleDatabaseChange} theme={theme}/>
+                        <DatabaseSelector value={databaseType} onChange={handleDatabaseChange} theme={theme} />
 
                         {/* View-mode toggle — shown when there are multiple statements */}
                         {(statementType === 'mixed' || selectGraphs.length > 1) && (() => {
@@ -95,8 +96,8 @@ ORDER BY o.created_at DESC;`);
                                     label: 'Grouped',
                                     icon: (
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
-                                            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                                            <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+                                            <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
                                         </svg>
                                     ),
                                 },
@@ -105,9 +106,9 @@ ORDER BY o.created_at DESC;`);
                                     label: 'Per Query',
                                     icon: (
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="2" y="3" width="20" height="4" rx="1"/>
-                                            <rect x="2" y="10" width="20" height="4" rx="1"/>
-                                            <rect x="2" y="17" width="20" height="4" rx="1"/>
+                                            <rect x="2" y="3" width="20" height="4" rx="1" />
+                                            <rect x="2" y="10" width="20" height="4" rx="1" />
+                                            <rect x="2" y="17" width="20" height="4" rx="1" />
                                         </svg>
                                     ),
                                 },
@@ -163,8 +164,8 @@ ORDER BY o.created_at DESC;`);
                             className={`${isCodeInputCollapsed ? 'w-0 md:w-0 pl-4' : 'w-full md:w-[320px]'} h-full shrink-0 flex flex-col overflow-hidden min-h-0`}>
                             {isCodeInputCollapsed ? (
                                 <button onClick={() =>
-                                        setIsCodeInputCollapsed(false)
-                                    }style={styles.showCodeButton}>
+                                    setIsCodeInputCollapsed(false)
+                                } style={styles.showCodeButton}>
                                     Show SQL Editor
                                 </button>
                             ) : (
@@ -189,20 +190,20 @@ ORDER BY o.created_at DESC;`);
                             {isError ? (
                                 <div style={styles.errorContainer}>
                                     <h3 style={{
-                                            margin: 0,
-                                            color: theme.error.text,
-                                        }}>
+                                        margin: 0,
+                                        color: theme.error.text,
+                                    }}>
                                         SQL Parse Error
                                     </h3>
 
                                     <pre style={{
-                                            margin: 0,
-                                            whiteSpace: 'pre-wrap',
-                                            fontFamily:
-                                                'JetBrains Mono, monospace',
-                                            fontSize: '14px',
-                                            lineHeight: 1.6,
-                                        }}
+                                        margin: 0,
+                                        whiteSpace: 'pre-wrap',
+                                        fontFamily:
+                                            'JetBrains Mono, monospace',
+                                        fontSize: '14px',
+                                        lineHeight: 1.6,
+                                    }}
                                     >
                                         {errorMessage}
                                     </pre>
@@ -266,7 +267,7 @@ ORDER BY o.created_at DESC;`);
                     <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: isDarkMode ? '#fff' : '#000' }}>
                         SQL Visualizer — Interactive Query, Schema & Data Visualization
                     </h1>
-                    
+
                     <p className="text-lg mb-6" style={{ color: isDarkMode ? '#e0e0e0' : '#333' }}>
                         Transform complex SQL into interactive visual diagrams. Visualize <strong>SELECT</strong> query relationships, explore <strong>CREATE TABLE</strong> schemas with constraint badges, inspect <strong>INSERT INTO</strong> datasets with syntax-colored data grids, and seamlessly execute multi-statement mixed scripts in a single workspace.
                     </p>
