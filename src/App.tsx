@@ -3,12 +3,16 @@ import { useState, useCallback } from 'react';
 import CodeInputBox from './components/CodeInputBox';
 import DatabaseSelector from './components/DatabaseSelector';
 import FlowDiagram from './flowDiagram/FlowDiagram';
+import CreateTableView from './components/CreateTableView';
+import InsertView from './components/InsertView';
+import MixedView from './components/MixedView';
 import Header from './components/Header';
 
 import { getTheme, getStyles } from './styles/app.styles';
 
 import { useSQLParser } from './hooks/SQLparser.hook';
 import { useColumnHighlights } from './hooks/columnHighlights.hook';
+import type { ViewMode } from './components/MixedView';
 
 function App() {
     const [databaseType, setDatabaseType] = useState('Transactsql');
@@ -21,9 +25,8 @@ WHERE o.created_at >= '2025-08-01'
 ORDER BY o.created_at DESC;`);
 
     const [isDarkMode, setIsDarkMode] = useState(true);
-
-    const [isCodeInputCollapsed, setIsCodeInputCollapsed] =
-        useState(false);
+    const [isCodeInputCollapsed, setIsCodeInputCollapsed] = useState(false);
+    const [viewMode, setViewMode] = useState<ViewMode>('per-statement');
 
     const theme = getTheme(isDarkMode);
 
@@ -35,11 +38,14 @@ ORDER BY o.created_at DESC;`);
     const {
         tableNodes,
         tableEdges,
+        selectGraphs,
         isError,
         errorMessage,
         columnHighlights,
+        statementType,
+        createDefs,
+        insertDefs,
     } = useSQLParser(input, databaseType);
-    console.log('tableNodes', tableNodes);
     const {
         activeEditorHighlights,
         handleHoverColumn,
@@ -75,7 +81,81 @@ ORDER BY o.created_at DESC;`);
                 <div className=" flex flex-col flex-1 gap-4 overflow-hidden">
                     {/* CONTROLS */}
                     <div className=" flex items-center gap-4 h-14 shrink-0">
-                        <DatabaseSelector value={databaseType} onChange={handleDatabaseChange}theme={theme}/>
+                        <DatabaseSelector value={databaseType} onChange={handleDatabaseChange} theme={theme}/>
+
+                        {/* View-mode toggle — shown when there are multiple statements */}
+                        {(statementType === 'mixed' || selectGraphs.length > 1) && (() => {
+                            const isDark = isDarkMode;
+                            const border = theme.border;
+                            const bg = theme.secondary;
+                            const text = theme.text;
+                            const muted = theme.mutedText;
+                            const primary = theme.primary;
+                            const opts: { value: ViewMode; label: string; icon: React.ReactNode }[] = [
+                                {
+                                    value: 'grouped',
+                                    label: 'Grouped',
+                                    icon: (
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                                            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+                                        </svg>
+                                    ),
+                                },
+                                {
+                                    value: 'per-statement',
+                                    label: 'Per Query',
+                                    icon: (
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="2" y="3" width="20" height="4" rx="1"/>
+                                            <rect x="2" y="10" width="20" height="4" rx="1"/>
+                                            <rect x="2" y="17" width="20" height="4" rx="1"/>
+                                        </svg>
+                                    ),
+                                },
+                            ];
+                            return (
+                                <div style={{
+                                    display: 'flex', alignItems: 'center', gap: '4px',
+                                    background: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                                    border: `1px solid ${border}`,
+                                    borderRadius: '10px', padding: '3px',
+                                    marginLeft: 'auto',
+                                }}>
+                                    {opts.map(opt => {
+                                        const isActive = viewMode === opt.value;
+                                        return (
+                                            <button
+                                                key={opt.value}
+                                                onClick={() => setViewMode(opt.value)}
+                                                title={opt.label}
+                                                style={{
+                                                    display: 'flex', alignItems: 'center', gap: '5px',
+                                                    padding: '5px 10px',
+                                                    border: 'none',
+                                                    borderRadius: '7px',
+                                                    background: isActive
+                                                        ? (isDark ? 'rgba(59,130,246,0.18)' : 'rgba(37,99,235,0.12)')
+                                                        : 'transparent',
+                                                    color: isActive ? primary : muted,
+                                                    cursor: 'pointer',
+                                                    fontSize: '11px',
+                                                    fontWeight: isActive ? 700 : 500,
+                                                    transition: 'all 0.15s ease',
+                                                    outline: 'none',
+                                                    boxShadow: isActive
+                                                        ? `0 0 0 1px ${primary}44`
+                                                        : 'none',
+                                                }}
+                                            >
+                                                {opt.icon}
+                                                <span style={{ whiteSpace: 'nowrap' }}>{opt.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })()}
                     </div>
                     {/* CONTENT AREA */}
                     <div className="flex flex-col md:flex-row flex-1 relative overflow-hidden min-h-0 min-w-0">
@@ -129,6 +209,37 @@ ORDER BY o.created_at DESC;`);
                                         {errorMessage}
                                     </pre>
                                 </div>
+                            ) : statementType === 'create' ? (
+                                <CreateTableView
+                                    tables={createDefs}
+                                    theme={theme}
+                                />
+                            ) : statementType === 'insert' ? (
+                                <InsertView
+                                    inserts={insertDefs}
+                                    theme={theme}
+                                />
+                            ) : statementType === 'mixed' ? (
+                                <MixedView
+                                    createDefs={createDefs}
+                                    insertDefs={insertDefs}
+                                    selectGraphs={selectGraphs}
+                                    theme={theme}
+                                    viewMode={viewMode}
+                                    onHoverColumn={handleHoverColumn}
+                                    onHighlightColumns={handleHighlightColumns}
+                                />
+                            ) : selectGraphs.length > 1 ? (
+                                // Multiple SELECT statements → tabbed / grouped view
+                                <MixedView
+                                    createDefs={[]}
+                                    insertDefs={[]}
+                                    selectGraphs={selectGraphs}
+                                    theme={theme}
+                                    viewMode={viewMode}
+                                    onHoverColumn={handleHoverColumn}
+                                    onHighlightColumns={handleHighlightColumns}
+                                />
                             ) : (
                                 <FlowDiagram
                                     tableNodes={tableNodes}
@@ -155,39 +266,37 @@ ORDER BY o.created_at DESC;`);
             <section className="mb-8 px-4 py-6 rounded-lg" style={{ backgroundColor: isDarkMode ? '#1a1a2e' : '#f5f5f5', borderLeft: '4px solid var(--primary, #6366f1)' }}>
                 <article>
                     <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: isDarkMode ? '#fff' : '#000' }}>
-                        SQL Visualizer
+                        SQL Visualizer — Interactive Query, Schema & Data Visualization
                     </h1>
                     
                     <p className="text-lg mb-6" style={{ color: isDarkMode ? '#e0e0e0' : '#333' }}>
-                        Visualize SQL queries into interactive graphs and flow diagrams. Understand joins, subqueries, CTEs, and table relationships visually. Our SQL query visualization tool helps developers and database professionals understand complex query structures at a glance.
+                        Transform complex SQL into interactive visual diagrams. Visualize <strong>SELECT</strong> query relationships, explore <strong>CREATE TABLE</strong> schemas with constraint badges, inspect <strong>INSERT INTO</strong> datasets with syntax-colored data grids, and seamlessly execute multi-statement mixed scripts in a single workspace.
                     </p>
 
                     <h2 className="text-2xl font-bold mb-4" style={{ color: isDarkMode ? '#fff' : '#000' }}>
-                        Features
+                        Key Features
                     </h2>
                     <ul className="list-disc list-inside mb-8 space-y-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                        <li>Interactive SQL query graph visualization with node-sql-parser</li>
-                        <li>Advanced join and relationship mapping for all SQL join types</li>
-                        <li>SQL Abstract Syntax Tree (AST) parsing and visualization</li>
-                        <li>CTE (Common Table Expression) and subquery visualization</li>
-                        <li>Support for complex nested queries and multiple database types</li>
-                        <li>Real-time interactive SQL diagrams built with React Flow</li>
-                        <li>Dark and light mode themes for comfortable development</li>
-                        <li>Column highlighting and relationship tracking</li>
+                        <li><strong>Interactive Query Graphs:</strong> React Flow-powered flow diagrams mapping tables, joins, aliases, and column data lineages.</li>
+                        <li><strong>CREATE TABLE Schema Cards:</strong> Floating schema cards displaying color-coded data types (INT, VARCHAR, DATETIME, JSON), keys (PK, FK), and constraints (NOT NULL, UNIQUE, DEFAULT).</li>
+                        <li><strong>INSERT INTO Data Grid:</strong> Tabular data viewer highlighting numbers, strings, booleans, and NULLs with expandable preview rows.</li>
+                        <li><strong>Multi-Statement Mixed Mode:</strong> Run scripts containing CREATE, INSERT, and SELECT together with automatic statement detection.</li>
+                        <li><strong>Grouped vs. Per Query Modes:</strong> Toggle effortlessly between a consolidated 3-tab layout (Schema, Data, Query) and granular per-statement tabs.</li>
+                        <li><strong>Stacked Single Flow Canvas:</strong> In Grouped mode, multiple SELECT queries are stacked cleanly on a single unified canvas without cluttered split screens.</li>
+                        <li><strong>Two-Way Column Highlighting:</strong> Hover over table columns to highlight linked relationships across nodes and in the SQL editor.</li>
+                        <li><strong>Multi-Dialect Parsing:</strong> Native parsing support for MySQL, PostgreSQL, T-SQL (SQL Server), SQLite, and BigQuery.</li>
                     </ul>
 
                     <h2 className="text-2xl font-bold mb-4" style={{ color: isDarkMode ? '#fff' : '#000' }}>
-                        Supported SQL Features
+                        Supported SQL Constructs
                     </h2>
                     <ul className="list-disc list-inside mb-8 space-y-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                        <li>SQL SELECT statements and query parsing</li>
-                        <li>INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN visualization</li>
-                        <li>CROSS JOIN and self-join relationships</li>
-                        <li>Subqueries in SELECT, FROM, and WHERE clauses</li>
-                        <li>CTEs and WITH clauses for recursive queries</li>
-                        <li>WHERE conditions and filter visualization</li>
-                        <li>ORDER BY and GROUP BY clauses</li>
-                        <li>UNION and set operations</li>
+                        <li><strong>DQL (Queries):</strong> SELECT, WHERE, GROUP BY, ORDER BY, HAVING, LIMIT, UNION, UNION ALL</li>
+                        <li><strong>Joins:</strong> INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL OUTER JOIN, CROSS JOIN, and self-joins</li>
+                        <li><strong>Subqueries & CTEs:</strong> Common Table Expressions (WITH clause) and nested subqueries</li>
+                        <li><strong>DDL (Schemas):</strong> CREATE TABLE, PRIMARY KEY, FOREIGN KEY ... REFERENCES, UNIQUE, NOT NULL, DEFAULT, AUTO_INCREMENT</li>
+                        <li><strong>DML (Data):</strong> INSERT INTO ... VALUES (...), multi-row batch inserts, and INSERT INTO ... SELECT</li>
+                        <li><strong>Multi-Query Scripts:</strong> Semicolon-delimited SQL scripts parsed and organized concurrently</li>
                     </ul>
 
                     <h2 className="text-2xl font-bold mb-4" style={{ color: isDarkMode ? '#fff' : '#000' }}>
@@ -199,7 +308,34 @@ ORDER BY o.created_at DESC;`);
                                 What is SQL Visualizer?
                             </summary>
                             <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                                SQL Visualizer is an interactive web-based tool that converts SQL queries into visual graph diagrams. It helps developers understand query structures, table relationships, joins, and data flow at a glance without needing to analyze complex SQL syntax.
+                                SQL Visualizer is an interactive web tool that converts SQL queries, database schemas, and data insertions into intuitive visual diagrams. It helps developers, database engineers, and students understand query execution paths, schema designs, and data flows at a glance.
+                            </p>
+                        </details>
+
+                        <details className="mb-4 p-4 rounded" style={{ backgroundColor: isDarkMode ? '#252540' : '#efefef' }}>
+                            <summary className="cursor-pointer font-semibold" style={{ color: isDarkMode ? '#fff' : '#000' }}>
+                                Can I visualize CREATE TABLE and INSERT INTO statements?
+                            </summary>
+                            <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
+                                Yes! In addition to SELECT queries, SQL Visualizer automatically parses CREATE TABLE statements into rich schema cards (with data types, primary keys, foreign key relationships, and constraints) and INSERT INTO statements into interactive data grids.
+                            </p>
+                        </details>
+
+                        <details className="mb-4 p-4 rounded" style={{ backgroundColor: isDarkMode ? '#252540' : '#efefef' }}>
+                            <summary className="cursor-pointer font-semibold" style={{ color: isDarkMode ? '#fff' : '#000' }}>
+                                What is the difference between Grouped and Per Query view modes?
+                            </summary>
+                            <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
+                                When running scripts with multiple statements, the <strong>Grouped</strong> mode organizes your workspace into 3 clean tabs: Schema (all tables), Data (all inserts), and Query (all SELECT queries stacked in one unified flow diagram). The <strong>Per Query</strong> mode provides a dedicated tab for each individual statement.
+                            </p>
+                        </details>
+
+                        <details className="mb-4 p-4 rounded" style={{ backgroundColor: isDarkMode ? '#252540' : '#efefef' }}>
+                            <summary className="cursor-pointer font-semibold" style={{ color: isDarkMode ? '#fff' : '#000' }}>
+                                Can I run multiple SQL queries together in a single script?
+                            </summary>
+                            <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
+                                Yes! You can write multiple statements separated by semicolons (e.g. creating tables, inserting sample rows, and querying them with joins). SQL Visualizer parses every statement and provides unified tabbed access.
                             </p>
                         </details>
 
@@ -208,7 +344,7 @@ ORDER BY o.created_at DESC;`);
                                 Does it support joins and subqueries?
                             </summary>
                             <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                                Yes! SQL Visualizer fully supports all types of SQL joins (INNER, LEFT, RIGHT, FULL OUTER, CROSS), subqueries in any clause, CTEs (Common Table Expressions), and complex nested queries. Each relationship is visually represented in the interactive diagram.
+                                Yes! SQL Visualizer fully supports all types of SQL joins (INNER, LEFT, RIGHT, FULL OUTER, CROSS), subqueries in SELECT/FROM/WHERE clauses, and CTEs (Common Table Expressions). Each relationship is visually traced with connecting edges.
                             </p>
                         </details>
 
@@ -217,40 +353,22 @@ ORDER BY o.created_at DESC;`);
                                 Which databases does SQL Visualizer support?
                             </summary>
                             <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                                SQL Visualizer supports multiple SQL dialects including T-SQL (SQL Server), MySQL, PostgreSQL, and more. You can select your database type from the dropdown to ensure accurate parsing of dialect-specific SQL syntax.
+                                SQL Visualizer supports multiple SQL dialects including T-SQL (SQL Server), MySQL, PostgreSQL, SQLite, and BigQuery. You can select your database dialect from the top bar dropdown for accurate syntax parsing.
                             </p>
                         </details>
 
                         <details className="mb-4 p-4 rounded" style={{ backgroundColor: isDarkMode ? '#252540' : '#efefef' }}>
                             <summary className="cursor-pointer font-semibold" style={{ color: isDarkMode ? '#fff' : '#000' }}>
-                                How does the interactive diagram work?
+                                How does column highlighting work?
                             </summary>
                             <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                                The interactive SQL diagram lets you hover over tables and columns to highlight relationships, drag nodes to reorganize the layout, zoom and pan through large queries, and see real-time updates as you modify your SQL query in the editor.
-                            </p>
-                        </details>
-
-                        <details className="mb-4 p-4 rounded" style={{ backgroundColor: isDarkMode ? '#252540' : '#efefef' }}>
-                            <summary className="cursor-pointer font-semibold" style={{ color: isDarkMode ? '#fff' : '#000' }}>
-                                Can I use this for learning SQL?
-                            </summary>
-                            <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                                Absolutely! SQL Visualizer is an excellent learning tool for understanding how SQL queries work. By visualizing the query structure, joins, and data relationships, you can quickly understand query logic and improve your SQL writing skills.
-                            </p>
-                        </details>
-
-                        <details className="mb-4 p-4 rounded" style={{ backgroundColor: isDarkMode ? '#252540' : '#efefef' }}>
-                            <summary className="cursor-pointer font-semibold" style={{ color: isDarkMode ? '#fff' : '#000' }}>
-                                How is column highlighting useful?
-                            </summary>
-                            <p className="mt-2" style={{ color: isDarkMode ? '#d0d0d0' : '#333' }}>
-                                Column highlighting helps you trace which columns are used across tables and joins. Hover over columns in the diagram to see them highlighted in the SQL editor and vice versa, making it easy to understand data flow through your query.
+                                Column highlighting lets you trace which columns are passed through tables and joins. Hover over columns in the diagram to see them highlighted in connected nodes and directly inside the SQL editor.
                             </p>
                         </details>
                     </div>
 
                     <p className="text-sm mt-8" style={{ color: isDarkMode ? '#a0a0a0' : '#666' }}>
-                        Try the interactive SQL parser and query visualizer below to see your SQL queries transformed into clear, understandable diagrams.
+                        Start typing or paste your SQL script into the editor above to experience real-time query graphs, schema cards, and data grids.
                     </p>
                 </article>
             </section>

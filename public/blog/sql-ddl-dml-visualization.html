@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizing SQL Schemas and Data: CREATE TABLE & INSERT INTO Guide</title>
+    <meta name="description" content="Learn how to visualize SQL CREATE TABLE schemas, constraints, foreign keys, and INSERT INTO data grids alongside query diagrams using SQL Visualizer.">
+    <meta name="keywords" content="SQL CREATE TABLE, SQL INSERT INTO, SQL schema visualization, database schema cards, SQL data grid, foreign key visualization, SQL DDL DML">
+    <meta property="og:title" content="Visualizing SQL Schemas and Data: CREATE TABLE & INSERT INTO Guide">
+    <meta property="og:description" content="Learn how to inspect table schemas, constraints, foreign keys, and insert data grids visually with SQL Visualizer.">
+    <meta property="og:url" content="https://sqlvisualizer.yashguptaiiit.in/blog/sql-ddl-dml-visualization.html">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Visualizing SQL Schemas and Data: CREATE TABLE & INSERT INTO Guide">
+    <meta name="twitter:description" content="Inspect table schemas, constraints, foreign keys, and insert data visually.">
+    <link rel="canonical" href="https://sqlvisualizer.yashguptaiiit.in/blog/sql-ddl-dml-visualization.html">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        h1 { font-size: 2.4em; margin-bottom: 20px; color: #1e40af; }
+        h2 { font-size: 1.8em; margin: 30px 0 15px; color: #1e40af; }
+        h3 { font-size: 1.3em; margin: 20px 0 10px; color: #2563eb; }
+        p { margin-bottom: 15px; font-size: 1.05em; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        pre { color: black; background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; font-size: 0.9em; line-height: 1.5; }
+        .cta { background: #1e40af; color: white; padding: 20px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .cta a { color: white; text-decoration: none; font-weight: bold; font-size: 1.1em; }
+        .example { background: #f9f9f9; padding: 15px; border-left: 4px solid #1e40af; margin: 20px 0; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; font-weight: bold; margin-right: 5px; }
+        .badge-pk { background: #fef3c7; color: #d97706; }
+        .badge-fk { background: #ede9fe; color: #7c3aed; }
+        .badge-nn { background: #e2e8f0; color: #475569; }
+        li { margin-left: 20px; margin-bottom: 10px; }
+        ul { margin-bottom: 20px; }
+        article { line-height: 1.8; }
+        time { color: #666; font-size: 0.9em; }
+        .nav-links { margin-bottom: 30px; font-size: 0.95em; }
+        .nav-links a { color: #1e40af; text-decoration: none; font-weight: 500; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="/blog/">← Back to SQL Blog</a> | <a href="https://sqlvisualizer.yashguptaiiit.in/">SQL Visualizer Tool</a>
+        </div>
+        <article>
+            <h1>Visualizing SQL Schemas and Data: CREATE TABLE & INSERT INTO Guide</h1>
+            <p><time>Published: September 4, 2026</time></p>
+
+            <p>Most SQL visualizers focus exclusively on <code>SELECT</code> queries. But understanding relational databases starts well before query execution: it begins with <strong>Data Definition Language (DDL)</strong> schemas and <strong>Data Manipulation Language (DML)</strong> insertions.</p>
+
+            <p>In this guide, we'll explore how modern visual tools like <a href="https://sqlvisualizer.yashguptaiiit.in/">SQL Visualizer</a> transform <code>CREATE TABLE</code> and <code>INSERT INTO</code> statements into clean schema cards, constraint maps, and interactive data grids.</p>
+
+            <div class="cta">
+                <p>Want to see your schemas and queries in action?</p>
+                <a href="https://sqlvisualizer.yashguptaiiit.in/">Launch SQL Visualizer Free →</a>
+            </div>
+
+            <h2>1. Visualizing CREATE TABLE Schemas</h2>
+            <p>A <code>CREATE TABLE</code> statement establishes the architecture of your data. When visual tools parse table definitions, they extract critical structural properties:</p>
+            <ul>
+                <li><strong>Column Data Types:</strong> Visual badges distinguishing numeric (<code>INT</code>, <code>DECIMAL</code>), textual (<code>VARCHAR</code>, <code>TEXT</code>), temporal (<code>DATETIME</code>, <code>TIMESTAMP</code>), boolean, and JSON fields.</li>
+                <li><strong>Primary Keys (<span class="badge badge-pk">PK</span>):</strong> Clearly identified identifiers with key indicators.</li>
+                <li><strong>Foreign Keys (<span class="badge badge-fk">FK</span>):</strong> Reference arrows pointing to parent tables and target columns.</li>
+                <li><strong>Constraints:</strong> Badges for <code>NOT NULL</code>, <code>UNIQUE</code>, <code>DEFAULT</code> values, and <code>AUTO_INCREMENT</code>.</li>
+            </ul>
+
+            <div class="example">
+                <pre><code>CREATE TABLE users (
+    id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    role_id INT REFERENCES roles(id)
+);</code></pre>
+            </div>
+
+            <p>Instead of reading raw column lists, visual schema cards group column attributes together so you can review table contracts and referential integrity at a glance.</p>
+
+            <h2>2. Visualizing INSERT INTO Statements</h2>
+            <p>Data insertion queries define the rows loaded into your database. When visualizing <code>INSERT INTO</code> queries, the parser formats values into an organized, type-highlighted data grid:</p>
+            <ul>
+                <li><strong>Automatic Column Mapping:</strong> Explicit column lists or auto-generated headers matching inserted expressions.</li>
+                <li><strong>Type-Aware Syntax Highlighting:</strong> Numbers appear in blue, quoted strings in green, booleans in orange, and <code>NULL</code> values in distinguished red italics.</li>
+                <li><strong>Row Counting & Truncation:</strong> Easily inspect initial rows while supporting expandable bulk loads without overwhelming the screen.</li>
+                <li><strong>INSERT ... SELECT Support:</strong> Detects and highlights data pipelines where rows are generated by subqueries.</li>
+            </ul>
+
+            <div class="example">
+                <pre><code>INSERT INTO users (id, name, email, role_id)
+VALUES 
+    (1, 'Alice Johnson', 'alice@example.com', 2),
+    (2, 'Bob Smith', 'bob@example.com', 1),
+    (3, 'Charlie Brown', 'charlie@example.com', 2);</code></pre>
+            </div>
+
+            <h2>3. Multi-Statement Mixed Mode</h2>
+            <p>Real-world database workflows often involve writing multiple statements together: creating tables, inserting sample seed data, and querying the combined result set. SQL Visualizer supports mixed scripts in two flexible views:</p>
+
+            <h3>Grouped Mode (Consolidated Tabs)</h3>
+            <p>Organizes your workspace into three focused tabs:</p>
+            <ul>
+                <li><strong>Schema Tab:</strong> All created tables displayed together as floating cards.</li>
+                <li><strong>Data Tab:</strong> All insert operations presented in compact, readable data grids.</li>
+                <li><strong>Query Tab:</strong> All <code>SELECT</code> queries rendered on a single React Flow canvas stacked vertically for clean query comparisons.</li>
+            </ul>
+
+            <h3>Per Query Mode</h3>
+            <p>Provides an individual tab for every single statement, letting you examine each query step-by-step.</p>
+
+            <h2>Try It Yourself</h2>
+            <p>Copy and paste this complete SQL workflow into SQL Visualizer:</p>
+            <div class="example">
+                <pre><code>CREATE TABLE departments (
+    id INT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE employees (
+    id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    salary DECIMAL(10,2),
+    dept_id INT REFERENCES departments(id)
+);
+
+INSERT INTO departments (id, name) VALUES (1, 'Engineering'), (2, 'Design');
+
+INSERT INTO employees (id, name, salary, dept_id) VALUES 
+    (101, 'Sarah Connor', 95000.00, 1),
+    (102, 'John Doe', 78000.00, 2);
+
+SELECT e.name, e.salary, d.name AS department
+FROM employees e
+JOIN departments d ON e.dept_id = d.id
+WHERE e.salary > 80000;</code></pre>
+            </div>
+
+            <div class="cta">
+                <p>Visualize your SQL queries, schemas, and data instantly.</p>
+                <a href="https://sqlvisualizer.yashguptaiiit.in/">Open SQL Visualizer Now →</a>
+            </div>
+        </article>
+
+        <footer>
+            <p>&copy; 2026 SQL Visualizer. All rights reserved.</p>
+            <p><a href="/blog/">← Back to Blog Index</a> | <a href="https://sqlvisualizer.yashguptaiiit.in/">Home</a></p>
+        </footer>
+    </div>
+</body>
+</html>
