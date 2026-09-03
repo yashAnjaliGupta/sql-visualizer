@@ -180,8 +180,30 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
         },
 
         ".cm-scroller": {
-          overflow: "auto",
+          height: "100%",
+          overflowY: "auto",
+          overflowX: "hidden",
           fontFamily: "Consolas, monospace",
+          scrollbarColor: `${theme?.secondary || "#2D3748"} ${theme?.background || "#1A202C"}`,
+          scrollbarWidth: "thin",
+        },
+
+        ".cm-scroller::-webkit-scrollbar": {
+          width: "10px",
+        },
+
+        ".cm-scroller::-webkit-scrollbar-track": {
+          backgroundColor: theme?.background || "#1A202C",
+        },
+
+        ".cm-scroller::-webkit-scrollbar-thumb": {
+          backgroundColor: theme?.secondary || "#2D3748",
+          borderRadius: "999px",
+          border: `2px solid ${theme?.background || "#1A202C"}`,
+        },
+
+        ".cm-scroller::-webkit-scrollbar-thumb:hover": {
+          backgroundColor: theme?.primary || "#3B82F6",
         },
 
         ".cm-content": {
@@ -374,11 +396,16 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
           className="
                         flex-1
                         overflow-hidden
+                        h-full
+                        min-h-0
                     "
+          style={{ minHeight: 0 }}
         >
           <CodeMirror
             value={value}
             height="100%"
+            style={{ height: "100%" }}
+            className="h-full"
             theme={theme?.isDark ? oneDark : "light"}
             extensions={extensions}
             onCreateEditor={(view) => {
@@ -414,15 +441,23 @@ const CodeInputBox: React.FC<CodeInputBoxProps> = ({
                     border-radius: 2px;
                 }
 
-                .cm-editor {
-                    height: 100%;
+                        .cm-editor {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    height: 100% !important;
+                    min-height: 0 !important;
                 }
 
                 .cm-scroller {
+                    min-height: 0 !important;
+                    height: 100% !important;
+                    max-height: 100% !important;
+                    overflow-y: auto !important;
                     overflow-x: hidden !important;
                 }
 
                 .cm-content {
+                    min-height: 0 !important;
                     white-space: pre-wrap !important;
                     overflow-wrap: anywhere !important;
                     word-break: break-word !important;

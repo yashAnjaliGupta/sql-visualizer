@@ -142,6 +142,7 @@ React Flow Renderer
 
 Planned features:
 
+- Create and INSERT Query Support
 - Condition edges
 - Edge tooltips for conditions/functions
 - Aggregation visualization

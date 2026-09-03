@@ -39,7 +39,7 @@ ORDER BY o.created_at DESC;`);
         errorMessage,
         columnHighlights,
     } = useSQLParser(input, databaseType);
-
+    console.log('tableNodes', tableNodes);
     const {
         activeEditorHighlights,
         handleHoverColumn,
@@ -78,10 +78,12 @@ ORDER BY o.created_at DESC;`);
                         <DatabaseSelector value={databaseType} onChange={handleDatabaseChange}theme={theme}/>
                     </div>
                     {/* CONTENT AREA */}
-                    <div className="flex flex-col md:flex-row flex-1 gap-4 relative overflow-hidden min-h-0 min-w-0">
+                    <div className="flex flex-col md:flex-row flex-1 relative overflow-hidden min-h-0 min-w-0">
                         {/* LEFT PANEL */}
                         <div
-                            style={styles.codeInputWrapper} className="w-full md:w-[320px] h-auto md:h-full shrink-0 flex flex-col overflow-hidden min-h-0">{isCodeInputCollapsed ? (
+                            style={styles.codeInputWrapper}
+                            className={`${isCodeInputCollapsed ? 'w-0 md:w-0 pl-4' : 'w-full md:w-[320px]'} h-full shrink-0 flex flex-col overflow-hidden min-h-0`}>
+                            {isCodeInputCollapsed ? (
                                 <button onClick={() =>
                                         setIsCodeInputCollapsed(false)
                                     }style={styles.showCodeButton}>

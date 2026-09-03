@@ -31,11 +31,10 @@ export function assignPositionsWithTopologicalSort(
   
   edges.forEach(edge => {
     if (graph[edge.source] !== undefined && graph[edge.target] !== undefined) {
-      graph[edge.target].push(edge.source);
-      inDegree[edge.source]++;
+      graph[edge.source].push(edge.target);
+      inDegree[edge.target]++;
     }
   });
-  
   const queue: string[] = [];
   const layerMap: { [id: string]: number } = {};
   
@@ -52,11 +51,13 @@ export function assignPositionsWithTopologicalSort(
       inDegree[neighbor]--;
       if (inDegree[neighbor] === 0) {
         queue.push(neighbor);
-        layerMap[neighbor] = layerMap[current] - 1;
+        layerMap[neighbor] = layerMap[current] + 1;
       }
     });
   }
   
+  // console.log('Layer map after topological sort:', layerMap);
+  // console.log('Edges:', edges);
   nodes.forEach(node => {
     if (layerMap[node.id] === undefined) {
       const maxLayer = Math.max(...Object.values(layerMap), 0);

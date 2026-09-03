@@ -102,7 +102,7 @@ export const getStyles = (
             minWidth: isCodeInputCollapsed
                 ? '0'
                 : '420px',
-
+            height: '100%',
             transition: 'all 0.3s ease',
             overflow: 'hidden',
             borderRadius: '24px',
