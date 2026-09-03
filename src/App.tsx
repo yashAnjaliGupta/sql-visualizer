@@ -8,7 +8,6 @@ import InsertView from './components/InsertView';
 import MixedView from './components/MixedView';
 import Header from './components/Header';
 
-
 import { getTheme, getStyles } from './styles/app.styles';
 
 import { useSQLParser } from './hooks/SQLparser.hook';
